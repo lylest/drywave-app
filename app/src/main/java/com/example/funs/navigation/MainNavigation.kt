@@ -17,16 +17,16 @@ fun MainNavigation(navController: NavHostController) {
             Home(navController = navController)
         }
 
-        composable(route = Screen.OrderScreen.route) {
-            Orders(navController = navController)
-        }
-
         composable(route = Screen.ProfileScreen.route) {
             Profile(navController = navController)
         }
 
         composable(route = Screen.NewOrder.route) {
             NewOrder(navController = navController)
+        }
+
+        composable(route = Screen.ViewOrder.route) {
+            ViewOrder(navController = navController)
         }
 
     }

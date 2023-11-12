@@ -3,10 +3,8 @@ package com.example.funs.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -19,6 +17,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.input.*
 import androidx.compose.ui.unit.dp
 import androidx.compose.material3.SearchBar
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 
 
@@ -109,54 +108,76 @@ fun SearchInput() {
         )
     }
 
-    DockedSearchBar(
-        query = text,
-        onQueryChange = {
-            text = it
-        },
-        onSearch = {
-            active = false
-        },
-        active = active,
-        onActiveChange = {
-            active = it
-        },
-        placeholder = {
-            Text(text = "Search orders")
-        },
-        leadingIcon = {
-            Icon(imageVector = Icons.Outlined.Search, contentDescription = "SearchIcon")
-        },
-        trailingIcon = {
-            if (active) {
-                Icon(
-                    modifier = Modifier.clickable {
-                        if (!text.isEmpty()) {
-                            text = ""
-                            println("text is empty")
-                        } else {
-                            active = false
-                            println("text is not empty $text")
-                        }
-                    },
-                    imageVector = Icons.Outlined.Close, contentDescription = "CloseIcon"
-                )
-            }
-        },
-        modifier = Modifier
-            .fillMaxWidth(0.9f),
-           shape = RoundedCornerShape(9.dp)
-    ) {
-        items.forEach {
-            Row(modifier = Modifier.padding(all = 14.dp)) {
-                Icon(
-                    modifier = Modifier.padding(end = 12.dp),
-                    imageVector = Icons.Outlined.History, contentDescription = null
-                )
-                Text(text = it)
-            }
-        }
-    }
+
+
+   Row(modifier = Modifier.fillMaxWidth().padding(start = 14.dp)) {
+
+       DockedSearchBar(
+           query = text,
+           onQueryChange = {
+               text = it
+           },
+           onSearch = {
+               active = false
+           },
+           active = active,
+           onActiveChange = {
+               active = it
+           },
+           placeholder = {
+               Text(text = "Search orders")
+           },
+           leadingIcon = {
+               Icon(imageVector = Icons.Outlined.Search, contentDescription = "SearchIcon")
+           },
+           trailingIcon = {
+               if (active) {
+                   Icon(
+                       modifier = Modifier.clickable {
+                           if (!text.isEmpty()) {
+                               text = ""
+                               println("text is empty")
+                           } else {
+                               active = false
+                               println("text is not empty $text")
+                           }
+                       },
+                       imageVector = Icons.Outlined.Close, contentDescription = "CloseIcon"
+                   )
+               }
+           },
+           colors = SearchBarDefaults.colors(MaterialTheme.colorScheme.surface),
+           modifier = Modifier
+               .fillMaxWidth(0.75f).padding(end = 12.dp),
+           //shape = RoundedCornerShape(12.dp)
+       ) {
+           items.forEach {
+               Row(modifier = Modifier.padding(all = 14.dp)) {
+                   Icon(
+                       modifier = Modifier.padding(end = 12.dp),
+                       imageVector = Icons.Outlined.History, contentDescription = null
+                   )
+                   Text(text = it)
+               }
+           }
+       }
+
+       Box(
+           contentAlignment = Alignment.Center,
+           modifier = Modifier
+               .width(60.dp)
+               .height(60.dp)
+               .padding(0.dp)
+               .background(MaterialTheme.colorScheme.surface, shape = CircleShape)
+       ) {
+
+           Icon(
+               imageVector = Icons.Outlined.Tune,
+               tint = MaterialTheme.colorScheme.onBackground,
+               contentDescription = null
+           )
+       }
+   }
 }
 
 
@@ -208,11 +229,7 @@ fun SearchShop() {
                 )
             }
         },
-        colors = SearchBarDefaults.colors (
-              containerColor = Color(0xFFD8E3F8),
-             // inputFieldColors = Color(MaterialTheme.colorScheme.background),
-
-        ),
+        colors = SearchBarDefaults.colors(MaterialTheme.colorScheme.surface),
         modifier = Modifier
             .fillMaxWidth().padding(top= 0.dp),
            shape = RoundedCornerShape(9.dp)
@@ -228,6 +245,76 @@ fun SearchShop() {
         }
     }
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SearchItems() {
+    var text by remember { mutableStateOf("") } // Query for SearchBar
+    var active by remember { mutableStateOf(false) } // Active state for SearchBar
+    val items = remember {
+        mutableStateListOf(
+            "Alice",
+            "James",
+            "Cat",
+            "Sean"
+        )
+    }
+
+    DockedSearchBar(
+        query = text,
+        onQueryChange = {
+            text = it
+        },
+        onSearch = {
+            active = false
+        },
+        active = active,
+        onActiveChange = {
+            active = it
+        },
+        placeholder = {
+            Text(text = "Search items")
+        },
+        leadingIcon = {
+            Icon(imageVector = Icons.Outlined.Search, contentDescription = "SearchIcon")
+        },
+        trailingIcon = {
+            if (active) {
+                Icon(
+                    modifier = Modifier.clickable {
+                        if (!text.isEmpty()) {
+                            text = ""
+                            println("text is empty")
+                        } else {
+                            active = false
+                            println("text is not empty $text")
+                        }
+                    },
+                    imageVector = Icons.Outlined.Close, contentDescription = "CloseIcon"
+                )
+            }
+        },
+        colors = SearchBarDefaults.colors(MaterialTheme.colorScheme.surface),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top= 0.dp),
+        shape = RoundedCornerShape(9.dp)
+    ) {
+        items.forEach {
+            Row(modifier = Modifier.padding(all = 14.dp)) {
+                Icon(
+                    modifier = Modifier.padding(end = 12.dp),
+                    imageVector = Icons.Outlined.History, contentDescription = null
+                )
+                Text(text = it)
+            }
+        }
+    }
+}
+
+
+
+
 
 
 

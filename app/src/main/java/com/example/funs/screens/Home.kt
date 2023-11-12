@@ -1,31 +1,34 @@
 package com.example.funs.screens
 
 
+import android.media.Image
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.funs.R
 import com.example.funs.components.SearchInput
+import com.example.funs.navigation.Screen
 
 
 @Composable
@@ -86,9 +89,10 @@ fun Home(navController: NavController) {
 
             val scrollState = rememberScrollState()
             Row(modifier = Modifier.horizontalScroll(scrollState)) {
-                ClothCategoryCard()
-                ClothCategoryCard()
-                ClothCategoryCard()
+                ServiceType(painterResource(id = R.drawable.wash), "Wash only")
+                ServiceType(painterResource(id = R.drawable.wash_and_dry), "Wash & Dry")
+                ServiceType(painterResource(id = R.drawable.dry), "Drying")
+                ServiceType(painterResource(id = R.drawable.press), "Pressing")
             }
 
             Row() {
@@ -105,15 +109,8 @@ fun Home(navController: NavController) {
             }
 
             Column () {
-                OrderCard()
-                OrderCard()
-                OrderCard()
-                OrderCard()
-                OrderCard()
-                OrderCard()
-                OrderCard()
-                OrderCard()
-                OrderCard()
+                OrderCard(navController)
+
             }
             Spacer(modifier = Modifier.height(60.dp))
 
@@ -123,9 +120,16 @@ fun Home(navController: NavController) {
 }
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun OrderCard() {
-    Column {
+fun OrderCard(navController:NavController) {
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.background,
+        ),
+        onClick = {
+        navController.navigate(Screen.ViewOrder.route)
+    }) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -231,23 +235,37 @@ fun ImageCard() {
 
 
 @Composable
-fun ClothCategoryCard() {
+fun ServiceType(imageRef: Painter, name:String ) {
     Card(
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-        ),
-        //border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
-        modifier = Modifier.widthIn(100.dp).heightIn(50.dp).padding(top = 5.dp, start = 0.dp, end = 5.dp),
-        shape = RoundedCornerShape(50.dp)
+        colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surface),
+        modifier = Modifier
+            .widthIn(120.dp)
+            .heightIn(100.dp)
+            .padding(top = 5.dp, start = 0.dp, end = 5.dp),
+            shape = RoundedCornerShape(12.dp)
     ) {
+        Image(
+            painter = imageRef,
+            contentScale = ContentScale.Crop,
+            contentDescription = "order icon",
+            modifier = Modifier
+                .width(100.dp)
+                .height(100.dp)
+                .padding(15.dp)
+               // .padding(top= 10.dp, start = 14.dp, end = 1.dp, bottom = 0.dp)
+        )
         Text(
-            text = "Washing & Drying",
+            text = name,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Center,
             modifier = Modifier
-                .padding(12.dp),
+                .padding(8.dp)
+                .width(95.dp),
             style = TextStyle(
-                fontWeight = FontWeight.Normal
-            )
+                fontWeight = FontWeight.Medium,
+
+                )
         )
     }
 }

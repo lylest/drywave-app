@@ -38,3 +38,26 @@ fun ButtonComponent(label: String) {
         }
     }
 }
+
+@Composable
+fun ButtonAdd(label: String) {
+    Button(
+        onClick = { },
+        modifier = Modifier.fillMaxWidth().heightIn(50.dp),
+        shape = RoundedCornerShape(6.dp),
+        contentPadding = PaddingValues()
+    ) {
+
+        Box(
+            modifier = Modifier
+                .heightIn(50.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = label,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+    }
+}
