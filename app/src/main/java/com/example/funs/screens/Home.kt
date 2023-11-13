@@ -6,7 +6,10 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -25,15 +28,26 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import com.example.funs.R
 import com.example.funs.components.SearchInput
 import com.example.funs.navigation.Screen
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Home(navController: NavController) {
     val scrollStateOrder = rememberScrollState()
+    var isVisible  by  remember { mutableStateOf(false)  }
+
+    fun closeDialog() {
+        isVisible  = false
+    }
+    fun openDialog() {
+        isVisible  = true
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -67,7 +81,27 @@ fun Home(navController: NavController) {
             )
 
             Spacer(modifier = Modifier.heightIn(30.dp))
-            SearchInput()
+            Row {
+                SearchInput ()
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .width(60.dp)
+                        .height(60.dp)
+                        .padding(0.dp)
+                        .background(MaterialTheme.colorScheme.surface, shape = CircleShape)
+                        .clickable {
+                            openDialog()
+                        }
+                ) {
+
+                    Icon(
+                        imageVector = Icons.Outlined.Tune,
+                        tint = MaterialTheme.colorScheme.onBackground,
+                        contentDescription = null
+                    )
+                }
+            }
 
             Text(
                 text = "Services",
@@ -116,9 +150,43 @@ fun Home(navController: NavController) {
 
         }
 
+        if(isVisible) {
+            MinimalDialog {  closeDialog() }
+        }
+
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MinimalDialog(onDismissRequest: () -> Unit) {
+        val datePickerState = rememberDatePickerState()
+        val confirmEnabled = derivedStateOf { datePickerState.selectedDateMillis != null }
+
+        DatePickerDialog(
+            onDismissRequest = { onDismissRequest() },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                              //"Selected date timestamp: ${datePickerState.selectedDateMillis}"
+                    },
+                    enabled = confirmEnabled.value
+                ) {
+                    Text("OK")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { onDismissRequest() }
+                ) {
+                    Text("Cancel")
+                }
+            }
+        ) {
+            DatePicker(state = datePickerState)
+        }
+
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

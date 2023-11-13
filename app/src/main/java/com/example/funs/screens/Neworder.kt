@@ -31,7 +31,6 @@ import androidx.compose.ui.unit.Dp
 import com.example.funs.components.ButtonAdd
 
 
-
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 
@@ -50,24 +49,6 @@ fun NewOrder(navController: NavController) {
     Scaffold(
         modifier = Modifier
             .nestedScroll(scrollBehavior.nestedScrollConnection),
-        topBar = {
-            CenterAlignedTopAppBar(
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                ),
-                title = {
-                    Text(
-                        text = "New order",
-                        style = TextStyle(
-                            fontWeight = FontWeight.Normal,
-                            fontSize = 22.sp
-                        )
-                    )
-                },
-                scrollBehavior = scrollBehavior,
-            )
-        },
     ) {
         if (showBottomSheet) {
             ModalBottomSheet(
@@ -90,82 +71,101 @@ fun NewOrder(navController: NavController) {
     }
 
     val scrollStateOrder = rememberScrollState()
-    Column(
-        modifier = Modifier
-            .fillMaxWidth(0.94f)
-            .fillMaxHeight()
-            .verticalScroll(scrollStateOrder)
-            .padding(start = 24.dp, top = 80.dp)
-    ) {
-        Text(
-            text = "Select shop",
-            modifier = Modifier.fillMaxWidth().heightIn().padding(top = 0.dp, start = 0.dp),
-            style = TextStyle(
-                textAlign = TextAlign.Left,
-                fontWeight = FontWeight.Normal,
-                fontSize = 20.sp
-            ),
-            color = MaterialTheme.colorScheme.onSurface
-        )
-
-        val scrollState = rememberScrollState()
-        Row(modifier = Modifier.horizontalScroll(scrollState)) {
-            SearchCard { toggleBottomSheet() }
-            ShopCard()
-            ShopCard()
-            ShopCard()
+    Column {
+        Box(modifier = Modifier
+            .fillMaxWidth()
+            .height(60.dp)
+            .background(MaterialTheme.colorScheme.surface)
+        ) {
+            Text(
+                text = "New order",
+                modifier = Modifier.fillMaxWidth().heightIn().padding(top = 15.dp, start = 24.dp),
+                style = TextStyle(
+                    textAlign = TextAlign.Left,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp
+                ),
+                color = MaterialTheme.colorScheme.onSurface
+            )
         }
 
-        Text(
-            text = "Pick a service",
-            modifier = Modifier.fillMaxWidth().heightIn().padding(top = 10.dp, start = 0.dp, bottom = 5.dp),
-            style = TextStyle(
-                textAlign = TextAlign.Left,
-                fontWeight = FontWeight.Normal,
-                fontSize = 20.sp
-            ),
-            color = MaterialTheme.colorScheme.onSurface
-        )
-
-        val scrollStateCategories = rememberScrollState()
-        Row(modifier = Modifier.horizontalScroll(scrollStateCategories)) {
-            ServiceType(painterResource(id = R.drawable.wash), "Wash only")
-            ServiceType(painterResource(id = R.drawable.wash_and_dry), "Wash & Dry")
-            ServiceType(painterResource(id = R.drawable.dry), "Drying")
-            ServiceType(painterResource(id = R.drawable.press), "Pressing")
-        }
-
-        Text(
-            text = "Add items",
-            modifier = Modifier.fillMaxWidth().heightIn().padding(top = 25.dp, start = 0.dp, bottom = 14.dp),
-            style = TextStyle(
-                textAlign = TextAlign.Left,
-                fontWeight = FontWeight.Normal,
-                fontSize = 20.sp
-            ),
-            color = MaterialTheme.colorScheme.onSurface
-        )
-        SearchItems()
-        Spacer(modifier = Modifier.height(15.dp))
-        PieceBar()
-        PieceBar()
-        PieceBar()
-
-        Spacer(modifier = Modifier.height(30.dp))
-        DashedDivider(
-            color = MaterialTheme.colorScheme.outline,
-            thickness = 1.dp,
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        )
+                .fillMaxWidth(0.94f)
+                .fillMaxHeight()
+                .verticalScroll(scrollStateOrder)
+                .padding(start = 24.dp, top = 20.dp)
+        ) {
+            Text(
+                text = "Select shop",
+                modifier = Modifier.fillMaxWidth().heightIn().padding(top = 0.dp, start = 0.dp),
+                style = TextStyle(
+                    textAlign = TextAlign.Left,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 20.sp
+                ),
+                color = MaterialTheme.colorScheme.onSurface
+            )
 
-        TotalPieces()
-        Spacer(modifier = Modifier.height(30.dp))
+            val scrollState = rememberScrollState()
+            Row(modifier = Modifier.horizontalScroll(scrollState)) {
+                SearchCard { toggleBottomSheet() }
+                ShopCard()
+                ShopCard()
+                ShopCard()
+            }
 
-        ButtonAdd("Place order")
+            Text(
+                text = "Pick a service",
+                modifier = Modifier.fillMaxWidth().heightIn().padding(top = 10.dp, start = 0.dp, bottom = 5.dp),
+                style = TextStyle(
+                    textAlign = TextAlign.Left,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 20.sp
+                ),
+                color = MaterialTheme.colorScheme.onSurface
+            )
 
-        Spacer(modifier = Modifier.height(70.dp))
+            val scrollStateCategories = rememberScrollState()
+            Row(modifier = Modifier.horizontalScroll(scrollStateCategories)) {
+                ServiceType(painterResource(id = R.drawable.wash), "Wash only")
+                ServiceType(painterResource(id = R.drawable.wash_and_dry), "Wash & Dry")
+                ServiceType(painterResource(id = R.drawable.dry), "Drying")
+                ServiceType(painterResource(id = R.drawable.press), "Pressing")
+            }
+
+            Text(
+                text = "Add items",
+                modifier = Modifier.fillMaxWidth().heightIn().padding(top = 25.dp, start = 0.dp, bottom = 14.dp),
+                style = TextStyle(
+                    textAlign = TextAlign.Left,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 20.sp
+                ),
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            SearchItems()
+            Spacer(modifier = Modifier.height(15.dp))
+            PieceBar()
+            PieceBar()
+            PieceBar()
+
+            Spacer(modifier = Modifier.height(30.dp))
+            DashedDivider(
+                color = MaterialTheme.colorScheme.outline,
+                thickness = 1.dp,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            )
+
+            TotalPieces()
+            Spacer(modifier = Modifier.height(30.dp))
+
+            ButtonAdd("Place order")
+
+            Spacer(modifier = Modifier.height(70.dp))
+        }
     }
 
 }

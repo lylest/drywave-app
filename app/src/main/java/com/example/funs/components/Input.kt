@@ -109,8 +109,11 @@ fun SearchInput() {
     }
 
 
-
-   Row(modifier = Modifier.fillMaxWidth().padding(start = 14.dp)) {
+   Row(modifier = Modifier
+       .fillMaxWidth(0.75f)
+       .padding(end = 12.dp)
+       .padding(start = 14.dp)
+   ) {
 
        DockedSearchBar(
            query = text,
@@ -146,11 +149,7 @@ fun SearchInput() {
                    )
                }
            },
-           colors = SearchBarDefaults.colors(MaterialTheme.colorScheme.surface),
-           modifier = Modifier
-               .fillMaxWidth(0.75f).padding(end = 12.dp),
-           //shape = RoundedCornerShape(12.dp)
-       ) {
+           colors = SearchBarDefaults.colors(MaterialTheme.colorScheme.surface)) {
            items.forEach {
                Row(modifier = Modifier.padding(all = 14.dp)) {
                    Icon(
@@ -162,21 +161,6 @@ fun SearchInput() {
            }
        }
 
-       Box(
-           contentAlignment = Alignment.Center,
-           modifier = Modifier
-               .width(60.dp)
-               .height(60.dp)
-               .padding(0.dp)
-               .background(MaterialTheme.colorScheme.surface, shape = CircleShape)
-       ) {
-
-           Icon(
-               imageVector = Icons.Outlined.Tune,
-               tint = MaterialTheme.colorScheme.onBackground,
-               contentDescription = null
-           )
-       }
    }
 }
 

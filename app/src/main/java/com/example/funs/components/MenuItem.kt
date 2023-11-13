@@ -51,6 +51,38 @@ fun MenuItem (icon: ImageVector, title:String, value:String, tint: Color, underl
              color = MaterialTheme.colorScheme.onBackground
          )
      }
-     Divider(modifier = Modifier.fillMaxWidth().height(0.5.dp).background(MaterialTheme.colorScheme.surface))
+     if(underline) {
+         Divider(modifier = Modifier.fillMaxWidth().height(0.5.dp).background(MaterialTheme.colorScheme.surface))
+     }
  }
+}
+
+@Composable
+fun MenuIcon (icon: ImageVector, title:String, value:String, tint: Color, underline:Boolean = true) {
+    Column (modifier = Modifier
+        .fillMaxWidth(0.98f)
+        .padding(start = 24.dp, top = 12.dp, end =  24.dp, bottom =  0.dp)) {
+        Row (){
+            Icon(
+                imageVector =icon,
+                tint = tint,
+                contentDescription = null,
+                modifier = Modifier.padding(top = 12.dp, end = 0.dp, bottom = 12.dp, start = 0.dp)
+            )
+            Text(
+                text = title,
+                modifier = Modifier.padding( top = 12.dp, bottom = 12.dp, start = 12.dp, end = 12.dp).fillMaxWidth(),
+                style = TextStyle(
+                    textAlign = TextAlign.Left,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 16.sp
+                ),
+                color = MaterialTheme.colorScheme.onBackground
+            )
+
+        }
+        if(underline) {
+            Divider(modifier = Modifier.fillMaxWidth().height(0.5.dp).background(MaterialTheme.colorScheme.surface))
+        }
+    }
 }

@@ -29,6 +29,10 @@ fun MainNavigation(navController: NavHostController) {
             ViewOrder(navController = navController)
         }
 
+        composable(route =Screen.Notifications.route) {
+            Notifications(navController = navController)
+        }
+
     }
 
 }

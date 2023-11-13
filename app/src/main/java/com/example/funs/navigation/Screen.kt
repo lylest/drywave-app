@@ -10,4 +10,5 @@ sealed class Screen (val route: String){
 
     object  ViewOrder: Screen("view_order")
 
+    object Notifications: Screen("notifications")
 }

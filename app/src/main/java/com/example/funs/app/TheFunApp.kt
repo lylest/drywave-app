@@ -40,6 +40,11 @@ fun TheFunApp () {
                             icon = Icons.Rounded.AddCircle
                         ),
                         ListMenu(
+                            name = "Notifications",
+                            route = "notifications",
+                            icon = Icons.Rounded.Notifications
+                        ),
+                        ListMenu(
                             name = "Profile",
                             route = "profile",
                             icon = Icons.Outlined.Person
