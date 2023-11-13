@@ -1,4 +1,4 @@
-package com.example.funs.screens
+package com.example.funs.screens.login
 
 
 import androidx.compose.foundation.background
@@ -9,6 +9,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.MailOutline
+import androidx.compose.material.icons.outlined.Phone
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -21,13 +22,14 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.funs.components.*
 import com.example.funs.navigation.Screen
 
 
 @Composable
-fun Login(navController: NavController) {
+fun Login(navController: NavController, loginViewModel: LoginViewModel = viewModel() ) {
     val scrollState = rememberScrollState()
     Surface(modifier = Modifier.fillMaxSize().background(Color.White)) {
         Column {
@@ -53,10 +55,22 @@ fun Login(navController: NavController) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
 
-                OutlinedInput("Email", Icons.Outlined.MailOutline)
+                OutlinedInput(
+                    "Phone",
+                    Icons.Outlined.Phone,
+                    onTextSelected =  {
+                        loginViewModel.onEvent(UIEvent.phoneChanged(it))
+                      }
+                    )
                 Spacer(modifier = Modifier.height(12.dp))
 
-                OutlinedPasswordInput("Password", Icons.Outlined.Lock)
+                OutlinedPasswordInput(
+                    "Password",
+                    Icons.Outlined.Lock,
+                    onTextSelected = {
+                        loginViewModel.onEvent(UIEvent.passwordChanged(it))
+                    }
+                )
                 Spacer(modifier = Modifier.height(50.dp))
 
                 ButtonComponent("Login")

@@ -23,7 +23,7 @@ import androidx.compose.ui.graphics.Color
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun OutlinedInput(label: String, icon: ImageVector) {
+fun OutlinedInput(label: String, icon: ImageVector, onTextSelected: (String) -> Unit) {
 
     var textValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue(""))
@@ -31,7 +31,10 @@ fun OutlinedInput(label: String, icon: ImageVector) {
 
     OutlinedTextField(
         value = textValue,
-        onValueChange = { textValue = it },
+        onValueChange = {
+            textValue = it
+            onTextSelected(it.toString())
+        },
         singleLine = true,
         label = { Text(label) },
         colors = TextFieldDefaults.outlinedTextFieldColors(
@@ -53,7 +56,7 @@ fun OutlinedInput(label: String, icon: ImageVector) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun OutlinedPasswordInput(label: String, icon: ImageVector) {
+fun OutlinedPasswordInput(label: String, icon: ImageVector, onTextSelected: (String) -> Unit) {
 
     var password by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue(""))
@@ -65,7 +68,10 @@ fun OutlinedPasswordInput(label: String, icon: ImageVector) {
 
     OutlinedTextField(
         value = password,
-        onValueChange = { password = it },
+        onValueChange = {
+            password = it
+            onTextSelected(it.toString())
+        },
         singleLine = true,
         label = { Text(label) },
         colors = TextFieldDefaults.outlinedTextFieldColors(
@@ -109,59 +115,61 @@ fun SearchInput() {
     }
 
 
-   Row(modifier = Modifier
-       .fillMaxWidth(0.75f)
-       .padding(end = 12.dp)
-       .padding(start = 14.dp)
-   ) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth(0.75f)
+            .padding(end = 12.dp)
+            .padding(start = 14.dp)
+    ) {
 
-       DockedSearchBar(
-           query = text,
-           onQueryChange = {
-               text = it
-           },
-           onSearch = {
-               active = false
-           },
-           active = active,
-           onActiveChange = {
-               active = it
-           },
-           placeholder = {
-               Text(text = "Search orders")
-           },
-           leadingIcon = {
-               Icon(imageVector = Icons.Outlined.Search, contentDescription = "SearchIcon")
-           },
-           trailingIcon = {
-               if (active) {
-                   Icon(
-                       modifier = Modifier.clickable {
-                           if (!text.isEmpty()) {
-                               text = ""
-                               println("text is empty")
-                           } else {
-                               active = false
-                               println("text is not empty $text")
-                           }
-                       },
-                       imageVector = Icons.Outlined.Close, contentDescription = "CloseIcon"
-                   )
-               }
-           },
-           colors = SearchBarDefaults.colors(MaterialTheme.colorScheme.surface)) {
-           items.forEach {
-               Row(modifier = Modifier.padding(all = 14.dp)) {
-                   Icon(
-                       modifier = Modifier.padding(end = 12.dp),
-                       imageVector = Icons.Outlined.History, contentDescription = null
-                   )
-                   Text(text = it)
-               }
-           }
-       }
+        DockedSearchBar(
+            query = text,
+            onQueryChange = {
+                text = it
+            },
+            onSearch = {
+                active = false
+            },
+            active = active,
+            onActiveChange = {
+                active = it
+            },
+            placeholder = {
+                Text(text = "Search orders")
+            },
+            leadingIcon = {
+                Icon(imageVector = Icons.Outlined.Search, contentDescription = "SearchIcon")
+            },
+            trailingIcon = {
+                if (active) {
+                    Icon(
+                        modifier = Modifier.clickable {
+                            if (!text.isEmpty()) {
+                                text = ""
+                                println("text is empty")
+                            } else {
+                                active = false
+                                println("text is not empty $text")
+                            }
+                        },
+                        imageVector = Icons.Outlined.Close, contentDescription = "CloseIcon"
+                    )
+                }
+            },
+            colors = SearchBarDefaults.colors(MaterialTheme.colorScheme.surface)
+        ) {
+            items.forEach {
+                Row(modifier = Modifier.padding(all = 14.dp)) {
+                    Icon(
+                        modifier = Modifier.padding(end = 12.dp),
+                        imageVector = Icons.Outlined.History, contentDescription = null
+                    )
+                    Text(text = it)
+                }
+            }
+        }
 
-   }
+    }
 }
 
 
@@ -215,8 +223,8 @@ fun SearchShop() {
         },
         colors = SearchBarDefaults.colors(MaterialTheme.colorScheme.surface),
         modifier = Modifier
-            .fillMaxWidth().padding(top= 0.dp),
-           shape = RoundedCornerShape(9.dp)
+            .fillMaxWidth().padding(top = 0.dp),
+        shape = RoundedCornerShape(9.dp)
     ) {
         items.forEach {
             Row(modifier = Modifier.padding(all = 14.dp)) {
@@ -281,7 +289,7 @@ fun SearchItems() {
         colors = SearchBarDefaults.colors(MaterialTheme.colorScheme.surface),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top= 0.dp),
+            .padding(top = 0.dp),
         shape = RoundedCornerShape(9.dp)
     ) {
         items.forEach {

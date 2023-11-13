@@ -1,14 +1,14 @@
 package com.example.funs.navigation
 
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import com.example.funs.screens.*
+import com.example.funs.screens.home.Home
+import com.example.funs.screens.neworder.NewOrder
+import com.example.funs.screens.notifications.Notifications
+import com.example.funs.screens.profile.Profile
+import com.example.funs.screens.vieworder.ViewOrder
 
 @Composable
 fun MainNavigation(navController: NavHostController) {

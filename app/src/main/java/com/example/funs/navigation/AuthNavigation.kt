@@ -4,8 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.funs.screens.Login
-import com.example.funs.screens.Signup
+import com.example.funs.screens.login.Login
+import com.example.funs.screens.signup.Signup
 
 @Composable
 fun AuthNavigation() {

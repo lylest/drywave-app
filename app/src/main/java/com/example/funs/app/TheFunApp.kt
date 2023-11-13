@@ -18,9 +18,14 @@ import com.example.funs.navigation.AuthNavigation
 import com.example.funs.navigation.MainNavigation
 
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+
 @Composable
 fun TheFunApp () {
+     AuthNavigation()
+}
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@Composable
+fun MainNav () {
     val navController = rememberNavController()
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -57,7 +62,7 @@ fun TheFunApp () {
                 )
             }
         ){
-           MainNavigation(navController = navController)
+            MainNavigation(navController = navController)
         }
     }
 }

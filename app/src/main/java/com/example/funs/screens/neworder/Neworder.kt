@@ -1,4 +1,4 @@
-package com.example.funs.screens
+package com.example.funs.screens.neworder
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.*
@@ -29,6 +29,7 @@ import com.example.funs.components.SearchShop
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.unit.Dp
 import com.example.funs.components.ButtonAdd
+import com.example.funs.screens.home.ServiceType
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")

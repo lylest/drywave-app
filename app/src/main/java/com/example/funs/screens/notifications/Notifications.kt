@@ -1,4 +1,4 @@
-package com.example.funs.screens
+package com.example.funs.screens.notifications
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*

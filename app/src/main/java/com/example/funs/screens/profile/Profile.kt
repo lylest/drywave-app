@@ -1,4 +1,4 @@
-package com.example.funs.screens
+package com.example.funs.screens.profile
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -21,7 +21,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.funs.R
 import com.example.funs.components.MenuIcon
-import com.example.funs.components.MenuItem
 
 @Composable
 fun Profile (navController: NavController) {

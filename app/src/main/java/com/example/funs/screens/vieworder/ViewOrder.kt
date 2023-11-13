@@ -1,4 +1,4 @@
-package com.example.funs.screens
+package com.example.funs.screens.vieworder
 
 
 import androidx.compose.foundation.background
@@ -19,6 +19,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.funs.components.MenuItem
+import com.example.funs.screens.home.CircularProgress
+import com.example.funs.screens.neworder.DashedDivider
+import com.example.funs.screens.neworder.PieceBar
+import com.example.funs.screens.neworder.TotalPieces
 
 
 @Composable
