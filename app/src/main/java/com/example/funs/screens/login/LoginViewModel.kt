@@ -5,7 +5,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 
 class LoginViewModel : ViewModel() {
-    private  val TAG = LoginViewModel::class.simpleName
     var LoginUIState = mutableStateOf(LoginUIState())
 
     fun onEvent(event: UIEvent) {
@@ -14,18 +13,25 @@ class LoginViewModel : ViewModel() {
                 LoginUIState.value = LoginUIState.value.copy(
                     phone = event.phone
                 )
-                printState()
+
             }
+
             is UIEvent.passwordChanged -> {
                 LoginUIState.value = LoginUIState.value.copy(
                     password = event.password
                 )
-                printState()
+
             }
+
+            is UIEvent.LoginButtonClicked -> {
+                loginFunction()
+            }
+
         }
     }
 
-    private fun printState() {
-        Log.d(TAG, LoginUIState.value.toString())
+    fun loginFunction () {
+
     }
+
 }

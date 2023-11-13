@@ -23,7 +23,7 @@ import com.example.funs.screens.signup.SignupViewModel
 fun RadioCheck(signupViewModel: SignupViewModel = viewModel()) {
     var state by remember { mutableStateOf(true) }
 
-    Column(modifier = Modifier.fillMaxWidth(0.9f).padding(start = 15.dp)) {
+    Column(modifier = Modifier.fillMaxWidth(0.9f).padding(start = 15.dp, top = 12.dp)) {
         Text(
             text = "Sex",
             modifier = Modifier.fillMaxWidth().heightIn().padding(top = 0.dp, start = 15.dp),

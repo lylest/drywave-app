@@ -73,7 +73,9 @@ fun Login(navController: NavController, loginViewModel: LoginViewModel = viewMod
                 )
                 Spacer(modifier = Modifier.height(50.dp))
 
-                ButtonComponent("Login")
+                ButtonComponent("Login", onButtonClicked = {
+                      loginViewModel.onEvent(UIEvent.LoginButtonClicked)
+                })
 
 
                 Spacer(modifier = Modifier.height(50.dp))

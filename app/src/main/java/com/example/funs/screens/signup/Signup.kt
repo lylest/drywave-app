@@ -52,6 +52,7 @@ fun Signup(navController: NavController, signUpViewModel: SignupViewModel = view
                 OutlinedInput(
                     "First name",
                     Icons.Outlined.Person,
+                    signUpViewModel.SignupUIState.value.fullNameError,
                     onTextSelected = {
                         signUpViewModel.onEvent(SignupEvent.fullNameChanged(it))
                     }
@@ -61,6 +62,7 @@ fun Signup(navController: NavController, signUpViewModel: SignupViewModel = view
                 OutlinedInput(
                     "Phone",
                     Icons.Outlined.Phone,
+                    signUpViewModel.SignupUIState.value.phoneError,
                     onTextSelected = {
                         signUpViewModel.onEvent(SignupEvent.phoneChanged(it))
                     }
@@ -70,6 +72,7 @@ fun Signup(navController: NavController, signUpViewModel: SignupViewModel = view
                 OutlinedInput(
                     "Email",
                     Icons.Outlined.MailOutline,
+                    signUpViewModel.SignupUIState.value.emailError,
                     onTextSelected = {
                         signUpViewModel.onEvent(SignupEvent.emailChanged(it))
                     }
@@ -79,6 +82,7 @@ fun Signup(navController: NavController, signUpViewModel: SignupViewModel = view
                 OutlinedInput(
                     "Address",
                     Icons.Outlined.LocationOn,
+                    signUpViewModel.SignupUIState.value.addressError,
                     onTextSelected = {
                         signUpViewModel.onEvent(SignupEvent.addressChanged(it))
                     }
@@ -88,6 +92,7 @@ fun Signup(navController: NavController, signUpViewModel: SignupViewModel = view
                 OutlinedPasswordInput(
                     "Password",
                     Icons.Outlined.Lock,
+                    signUpViewModel.SignupUIState.value.passwordError,
                     onTextSelected = {
                         signUpViewModel.onEvent(SignupEvent.passwordChanged(it))
                     }
@@ -99,7 +104,9 @@ fun Signup(navController: NavController, signUpViewModel: SignupViewModel = view
                 Spacer(modifier = Modifier.height(30.dp))
 
                 Spacer(modifier = Modifier.height(50.dp))
-                ButtonComponent("Signup")
+                ButtonComponent("Signup", onButtonClicked = {
+                    signUpViewModel.onEvent(SignupEvent.SignupButtonClicked)
+                })
 
 
                 Spacer(modifier = Modifier.height(100.dp))

@@ -23,7 +23,11 @@ import androidx.compose.ui.graphics.Color
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun OutlinedInput(label: String, icon: ImageVector, onTextSelected: (String) -> Unit) {
+fun OutlinedInput(
+    label: String,
+    icon: ImageVector,
+    errorStatus:Boolean = false,
+    onTextSelected: (String) -> Unit) {
 
     var textValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue(""))
@@ -47,6 +51,7 @@ fun OutlinedInput(label: String, icon: ImageVector, onTextSelected: (String) -> 
         leadingIcon = {
             Icon(icon, contentDescription = "user icon")
         },
+        isError = errorStatus,
         modifier = Modifier
             .height(70.dp)
             .padding(top = 10.dp)
@@ -56,7 +61,11 @@ fun OutlinedInput(label: String, icon: ImageVector, onTextSelected: (String) -> 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun OutlinedPasswordInput(label: String, icon: ImageVector, onTextSelected: (String) -> Unit) {
+fun OutlinedPasswordInput(
+    label: String,
+    icon: ImageVector,
+    errorStatus: Boolean = false,
+    onTextSelected: (String) -> Unit) {
 
     var password by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue(""))
@@ -92,6 +101,7 @@ fun OutlinedPasswordInput(label: String, icon: ImageVector, onTextSelected: (Str
                 Icon(imageVector = IconImage, contentDescription = "info")
             }
         },
+        isError = errorStatus,
         visualTransformation = if (passwordVisible.value) VisualTransformation.None else PasswordVisualTransformation(),
         modifier = Modifier
             .height(70.dp)
