@@ -26,18 +26,16 @@ import androidx.compose.ui.graphics.Color
 fun OutlinedInput(
     label: String,
     icon: ImageVector,
-    errorStatus:Boolean = false,
+    errorStatus:Boolean = true,
     onTextSelected: (String) -> Unit) {
 
-    var textValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
-        mutableStateOf(TextFieldValue(""))
-    }
+    val textValue =  remember { mutableStateOf("") }
 
     OutlinedTextField(
-        value = textValue,
+        value = textValue.value,
         onValueChange = {
-            textValue = it
-            onTextSelected(it.toString())
+            textValue.value= it
+            onTextSelected(it)
         },
         singleLine = true,
         label = { Text(label) },
@@ -51,7 +49,7 @@ fun OutlinedInput(
         leadingIcon = {
             Icon(icon, contentDescription = "user icon")
         },
-        isError = errorStatus,
+        //isError = !errorStatus,
         modifier = Modifier
             .height(70.dp)
             .padding(top = 10.dp)
@@ -64,22 +62,20 @@ fun OutlinedInput(
 fun OutlinedPasswordInput(
     label: String,
     icon: ImageVector,
-    errorStatus: Boolean = false,
+    errorStatus: Boolean = true,
     onTextSelected: (String) -> Unit) {
 
-    var password by rememberSaveable(stateSaver = TextFieldValue.Saver) {
-        mutableStateOf(TextFieldValue(""))
-    }
+    var password= remember { mutableStateOf("") }
 
     var passwordVisible = remember {
         mutableStateOf(false)
     }
 
     OutlinedTextField(
-        value = password,
+        value = password.value,
         onValueChange = {
-            password = it
-            onTextSelected(it.toString())
+            password.value= it
+            onTextSelected(it)
         },
         singleLine = true,
         label = { Text(label) },
@@ -101,7 +97,7 @@ fun OutlinedPasswordInput(
                 Icon(imageVector = IconImage, contentDescription = "info")
             }
         },
-        isError = errorStatus,
+        //isError = !errorStatus,
         visualTransformation = if (passwordVisible.value) VisualTransformation.None else PasswordVisualTransformation(),
         modifier = Modifier
             .height(70.dp)

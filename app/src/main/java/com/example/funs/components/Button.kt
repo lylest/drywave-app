@@ -17,12 +17,14 @@ import androidx.compose.ui.unit.sp
 
 
 @Composable
-fun ButtonComponent(label: String, onButtonClicked: () -> Unit) {
+fun ButtonComponent(label: String, onButtonClicked: () -> Unit, isEnabled: Boolean ) {
     Button(
         onClick = { onButtonClicked.invoke() },
         modifier = Modifier.fillMaxWidth(0.8f).heightIn(50.dp),
         shape = RoundedCornerShape(6.dp),
-        contentPadding = PaddingValues()
+        contentPadding = PaddingValues(),
+        enabled = !isEnabled
+
     ) {
 
         Box(

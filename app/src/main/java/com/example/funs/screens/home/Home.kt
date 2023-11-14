@@ -11,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -26,17 +27,30 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.funs.R
 import com.example.funs.components.SearchInput
 import com.example.funs.navigation.Screen
+import com.example.funs.screens.profile.IndeterminateCircularIndicator
+import com.example.funs.screens.profile.ProfileViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Home(navController: NavController) {
+fun Home(navController: NavController, profileViewModel: ProfileViewModel = viewModel()) {
     val scrollStateOrder = rememberScrollState()
     var isVisible  by  remember { mutableStateOf(false)  }
+    var customer = profileViewModel.customer.value
+    val userId by profileViewModel.userId.observeAsState()
+    val currentUserToken by profileViewModel.currentUserToken.observeAsState()
+
+    LaunchedEffect(key1 = userId) {
+        if (userId != null && currentUserToken != null) {
+            val tokenWithBearer = "Bearer $currentUserToken"
+            profileViewModel.getCustomerFunction(userId, tokenWithBearer)
+        }
+    }
 
     fun closeDialog() {
         isVisible  = false
@@ -45,91 +59,32 @@ fun Home(navController: NavController) {
         isVisible  = true
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .verticalScroll(scrollStateOrder)
-    ) {
+    if(customer._id.isEmpty()) { IndeterminateCircularIndicator()
+    } else {
         Column(
             modifier = Modifier
-                .fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+                .verticalScroll(scrollStateOrder)
         ) {
-            Text(
-                text = "Welcome back",
-                modifier = Modifier.fillMaxWidth().heightIn().padding(top = 30.dp, start = 24.dp),
-                style = TextStyle(
-                    textAlign = TextAlign.Left,
-                    fontWeight = FontWeight.Light,
-                    fontSize = 20.sp
-                ),
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Text(
-                text = "John Doe",
-                modifier = Modifier.fillMaxWidth().heightIn().padding(top = 0.dp, start = 24.dp),
-                style = TextStyle(
-                    textAlign = TextAlign.Left,
-                    fontWeight = FontWeight.Medium,
-                    fontSize = 20.sp
-                ),
-                color = MaterialTheme.colorScheme.onSurface
-            )
-
-            Spacer(modifier = Modifier.heightIn(30.dp))
-            Row {
-                SearchInput ()
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .width(60.dp)
-                        .height(60.dp)
-                        .padding(0.dp)
-                        .background(MaterialTheme.colorScheme.surface, shape = CircleShape)
-                        .clickable {
-                            openDialog()
-                        }
-                ) {
-
-                    Icon(
-                        imageVector = Icons.Outlined.Tune,
-                        tint = MaterialTheme.colorScheme.onBackground,
-                        contentDescription = null
-                    )
-                }
-            }
-
-            Text(
-                text = "Services",
-                modifier = Modifier.fillMaxWidth().heightIn().padding(top = 17.dp, start = 24.dp),
-                style = TextStyle(
-                    textAlign = TextAlign.Left,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp
-                ),
-                color = MaterialTheme.colorScheme.onSurface
-            )
-        }
-        Spacer(modifier = Modifier.padding(top = 20.dp))
-
-        Column(
-            modifier = Modifier
-                .fillMaxWidth(0.94f).padding(start = 24.dp)
-        ) {
-
-            val scrollState = rememberScrollState()
-            Row(modifier = Modifier.horizontalScroll(scrollState)) {
-                ServiceType(painterResource(id = R.drawable.wash), "Wash only")
-                ServiceType(painterResource(id = R.drawable.wash_and_dry), "Wash & Dry")
-                ServiceType(painterResource(id = R.drawable.dry), "Drying")
-                ServiceType(painterResource(id = R.drawable.press), "Pressing")
-            }
-
-            Row() {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 Text(
-                    text = "Active orders",
-                    modifier = Modifier.fillMaxWidth().heightIn().padding(top = 17.dp, bottom = 20.dp),
+                    text = "Welcome back",
+                    modifier = Modifier.fillMaxWidth().heightIn().padding(top = 30.dp, start = 24.dp),
+                    style = TextStyle(
+                        textAlign = TextAlign.Left,
+                        fontWeight = FontWeight.Light,
+                        fontSize = 20.sp
+                    ),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = customer.name,
+                    modifier = Modifier.fillMaxWidth().heightIn().padding(top = 0.dp, start = 24.dp),
                     style = TextStyle(
                         textAlign = TextAlign.Left,
                         fontWeight = FontWeight.Medium,
@@ -137,20 +92,82 @@ fun Home(navController: NavController) {
                     ),
                     color = MaterialTheme.colorScheme.onSurface
                 )
+
+                Spacer(modifier = Modifier.heightIn(30.dp))
+                Row {
+                    SearchInput ()
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .width(60.dp)
+                            .height(60.dp)
+                            .padding(0.dp)
+                            .background(MaterialTheme.colorScheme.surface, shape = CircleShape)
+                            .clickable {
+                                openDialog()
+                            }
+                    ) {
+
+                        Icon(
+                            imageVector = Icons.Outlined.Tune,
+                            tint = MaterialTheme.colorScheme.onBackground,
+                            contentDescription = null
+                        )
+                    }
+                }
+
+                Text(
+                    text = "Services",
+                    modifier = Modifier.fillMaxWidth().heightIn().padding(top = 17.dp, start = 24.dp),
+                    style = TextStyle(
+                        textAlign = TextAlign.Left,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp
+                    ),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+            Spacer(modifier = Modifier.padding(top = 20.dp))
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth(0.94f).padding(start = 24.dp)
+            ) {
+
+                val scrollState = rememberScrollState()
+                Row(modifier = Modifier.horizontalScroll(scrollState)) {
+                    ServiceType(painterResource(id = R.drawable.wash), "Wash only")
+                    ServiceType(painterResource(id = R.drawable.wash_and_dry), "Wash & Dry")
+                    ServiceType(painterResource(id = R.drawable.dry), "Drying")
+                    ServiceType(painterResource(id = R.drawable.press), "Pressing")
+                }
+
+                Row() {
+                    Text(
+                        text = "Active orders",
+                        modifier = Modifier.fillMaxWidth().heightIn().padding(top = 17.dp, bottom = 20.dp),
+                        style = TextStyle(
+                            textAlign = TextAlign.Left,
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 20.sp
+                        ),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+
+                Column () {
+                    OrderCard(navController)
+
+                }
+                Spacer(modifier = Modifier.height(60.dp))
+
             }
 
-            Column () {
-                OrderCard(navController)
-
+            if(isVisible) {
+                MinimalDialog {  closeDialog() }
             }
-            Spacer(modifier = Modifier.height(60.dp))
 
         }
-
-        if(isVisible) {
-            MinimalDialog {  closeDialog() }
-        }
-
     }
 }
 

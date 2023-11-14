@@ -8,21 +8,33 @@ import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.navigation.NavController
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import com.example.funs.components.BottomNavBar
 import com.example.funs.components.ListMenu
 import com.example.funs.navigation.AuthNavigation
 import com.example.funs.navigation.MainNavigation
-
+import com.example.funs.screens.signup.SignupViewModel
 
 
 @Composable
-fun TheFunApp () {
-     AuthNavigation()
+fun TheFunApp(appViewModel: AppViewModel = viewModel()) {
+    val userId by appViewModel.userId.observeAsState()
+    val currentUserToken by appViewModel.currentUserToken.observeAsState()
+
+    if (currentUserToken != null && currentUserToken != "not-found") {
+        MainNav()
+    } else if (currentUserToken == "not-found") {
+        AuthNavigation()
+    } else {
+        AuthNavigation()
+    }
 }
+
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun MainNav () {
