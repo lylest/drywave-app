@@ -17,8 +17,12 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.input.*
 import androidx.compose.ui.unit.dp
 import androidx.compose.material3.SearchBar
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.funs.screens.neworder.NewOrderViewModel
+import com.example.funs.screens.profile.ProfileViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -181,22 +185,29 @@ fun SearchInput() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchShop() {
-    var text by remember { mutableStateOf("") } // Query for SearchBar
-    var active by remember { mutableStateOf(false) } // Active state for SearchBar
-    val items = remember {
-        mutableStateListOf(
-            "Alice",
-            "James",
-            "Cat",
-            "Sean"
-        )
-    }
+fun SearchShop(
+    newOrderViewModel: NewOrderViewModel = viewModel(),
+    profileViewModel: ProfileViewModel = viewModel()
+) {
+    var text by remember { mutableStateOf("") }
+    var active by remember { mutableStateOf(false) }
+    val sampleShopsList = newOrderViewModel.sampleShops
+    val userId by profileViewModel.userId.observeAsState()
+    val currentUserToken by profileViewModel.currentUserToken.observeAsState()
+
 
     SearchBar(
         query = text,
         onQueryChange = {
-            text = it
+          text = it
+            if (userId != null && currentUserToken != null) {
+                val tokenWithBearer = "Bearer $currentUserToken"
+                if(it.isNotEmpty()){ newOrderViewModel.searchShops(tokenWithBearer, it) } else {
+                    newOrderViewModel.getSampleShops(tokenWithBearer)
+                }
+            } else {
+                println("current yser token $$currentUserToken and user id $userId")
+            }
         },
         onSearch = {
             active = false
@@ -206,7 +217,7 @@ fun SearchShop() {
             active = it
         },
         placeholder = {
-            Text(text = "Search orders")
+            Text(text = "Search shop")
         },
         leadingIcon = {
             Icon(imageVector = Icons.Outlined.Search, contentDescription = "SearchIcon")
@@ -232,13 +243,19 @@ fun SearchShop() {
             .fillMaxWidth().padding(top = 0.dp),
         shape = RoundedCornerShape(9.dp)
     ) {
-        items.forEach {
-            Row(modifier = Modifier.padding(all = 14.dp)) {
+        sampleShopsList.forEach {
+            Row(
+                modifier = Modifier
+                    .padding(all = 14.dp)
+                    .clickable {
+                        newOrderViewModel.selectShop(it._id)
+                    }
+            ) {
                 Icon(
                     modifier = Modifier.padding(end = 12.dp),
-                    imageVector = Icons.Outlined.History, contentDescription = null
+                    imageVector = Icons.Outlined.Storefront, contentDescription = null
                 )
-                Text(text = it)
+                Text(text = it.name)
             }
         }
     }

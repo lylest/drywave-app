@@ -6,3 +6,4 @@ data class  ProfileDetailsResponseBody (
      val message: String = "",
      val data: CurrentUser
 )
+

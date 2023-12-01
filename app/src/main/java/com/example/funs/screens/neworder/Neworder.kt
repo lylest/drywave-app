@@ -3,12 +3,15 @@ package com.example.funs.screens.neworder
 import android.annotation.SuppressLint
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -27,20 +30,54 @@ import com.example.funs.R
 import com.example.funs.components.SearchItems
 import com.example.funs.components.SearchShop
 import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.example.funs.components.ButtonAdd
 import com.example.funs.screens.home.ServiceType
+import com.example.funs.screens.profile.ProfileViewModel
+import com.example.funs.utils.Utils
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 
 @Composable
-fun NewOrder(navController: NavController) {
+fun NewOrder(
+    navController: NavController,
+    profileViewModel: ProfileViewModel = viewModel(),
+    newOrderViewModel: NewOrderViewModel = viewModel()
+) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
     val sheetState = rememberModalBottomSheetState()
-    val scope = rememberCoroutineScope()
+    val sampleShopsList = newOrderViewModel.sampleShops
     var showBottomSheet by remember { mutableStateOf(false) }
+    val userId by profileViewModel.userId.observeAsState()
+    val currentUserToken by profileViewModel.currentUserToken.observeAsState()
+    val servicesList by newOrderViewModel.servicesList.observeAsState()
+
+
+    LaunchedEffect(key1 = userId) {
+        if (userId != null && currentUserToken != null) {
+            val tokenWithBearer = "Bearer $currentUserToken"
+            newOrderViewModel.getSampleShops(tokenWithBearer)
+        }
+    }
+
+    LaunchedEffect(key1 = newOrderViewModel.selectedShop.value) {
+        if (userId != null && currentUserToken != null) {
+            val tokenWithBearer = "Bearer $currentUserToken"
+
+            if (newOrderViewModel.selectedShop.value !== "empty") {
+                newOrderViewModel.getShopServices(tokenWithBearer, newOrderViewModel.selectedShop.value)
+            }
+        }
+    }
+
 
     fun toggleBottomSheet() {
         showBottomSheet = true
@@ -73,10 +110,11 @@ fun NewOrder(navController: NavController) {
 
     val scrollStateOrder = rememberScrollState()
     Column {
-        Box(modifier = Modifier
-            .fillMaxWidth()
-            .height(60.dp)
-            .background(MaterialTheme.colorScheme.surface)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(60.dp)
+                .background(MaterialTheme.colorScheme.surface)
         ) {
             Text(
                 text = "New order",
@@ -108,13 +146,22 @@ fun NewOrder(navController: NavController) {
                 color = MaterialTheme.colorScheme.onSurface
             )
 
-            val scrollState = rememberScrollState()
-            Row(modifier = Modifier.horizontalScroll(scrollState)) {
+            Row {
                 SearchCard { toggleBottomSheet() }
-                ShopCard()
-                ShopCard()
-                ShopCard()
+                LazyRow() {
+                    items(sampleShopsList) { shop ->
+                        ShopCard(
+                            shop.logo.path,
+                            shop.name, shop._id,
+                            shop._id == newOrderViewModel.selectedShop.value,
+                            onSelect = {
+                                newOrderViewModel.selectedShop.value = shop._id
+                            }
+                        )
+                    }
+                }
             }
+
 
             Text(
                 text = "Pick a service",
@@ -127,13 +174,22 @@ fun NewOrder(navController: NavController) {
                 color = MaterialTheme.colorScheme.onSurface
             )
 
-            val scrollStateCategories = rememberScrollState()
-            Row(modifier = Modifier.horizontalScroll(scrollStateCategories)) {
-                ServiceType(painterResource(id = R.drawable.wash), "Wash only")
-                ServiceType(painterResource(id = R.drawable.wash_and_dry), "Wash & Dry")
-                ServiceType(painterResource(id = R.drawable.dry), "Drying")
-                ServiceType(painterResource(id = R.drawable.press), "Pressing")
+            val scrollState = rememberScrollState()
+            Row(
+                modifier = Modifier
+                    .horizontalScroll(scrollState)
+            ) {
+                servicesList?.forEach { service ->
+                    ServiceType(
+                        service.icon.path,
+                        service.name,
+                        { newOrderViewModel.selectService(service._id) },
+                        newOrderViewModel.selectedService.value == service._id
+                    )
+                }
             }
+
+
 
             Text(
                 text = "Add items",
@@ -197,10 +253,12 @@ fun DashedDivider(
 }
 
 @Composable
-fun TotalPieces () {
-    Row (modifier = Modifier.fillMaxWidth()){
-        Box(modifier = Modifier
-            .fillMaxWidth(0.5f)) {
+fun TotalPieces() {
+    Row(modifier = Modifier.fillMaxWidth()) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(0.5f)
+        ) {
             Text(
                 text = "QUANTITY",
                 modifier = Modifier.padding(top = 4.dp, start = 10.dp, bottom = 0.dp),
@@ -223,8 +281,9 @@ fun TotalPieces () {
                 color = MaterialTheme.colorScheme.onBackground
             )
         }
-        Box ( modifier = Modifier
-            .fillMaxWidth(0.5f),
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(0.5f),
         ) {
             Text(
                 text = "TOTAL",
@@ -254,14 +313,16 @@ fun TotalPieces () {
 @Composable
 fun PieceBar() {
     Row(
-        modifier = Modifier.padding(top= 20.dp)) {
+        modifier = Modifier.padding(top = 20.dp)
+    ) {
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
                 .widthIn(80.dp)
                 .heightIn(80.dp)
                 .padding(top = 5.dp, start = 0.dp, end = 5.dp)
-                .background(MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(6.dp)
+                .background(
+                    MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(6.dp)
                     //.clickable()
                 ),
         ) {
@@ -323,20 +384,20 @@ fun PieceBar() {
         }
 
         Row {
-           Box(
-               contentAlignment = Alignment.Center,
-               modifier = Modifier
-                   .width(55.dp)
-                   .height(55.dp)
-                   .padding(top = 20.dp, start = 10.dp, end= 10.dp, bottom = 0.dp)
-                   .background(MaterialTheme.colorScheme.primaryContainer, shape = CircleShape)
-           ) {
-               Icon(
-                   imageVector = Icons.Outlined.Remove,
-                   tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                   contentDescription = null
-               )
-           }
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .width(55.dp)
+                    .height(55.dp)
+                    .padding(top = 20.dp, start = 10.dp, end = 10.dp, bottom = 0.dp)
+                    .background(MaterialTheme.colorScheme.primaryContainer, shape = CircleShape)
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Remove,
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                    contentDescription = null
+                )
+            }
 
             Text(
                 text = "1",
@@ -354,7 +415,7 @@ fun PieceBar() {
                 modifier = Modifier
                     .width(55.dp)
                     .height(55.dp)
-                    .padding(top = 20.dp, start = 10.dp, end= 10.dp, bottom = 0.dp)
+                    .padding(top = 20.dp, start = 10.dp, end = 10.dp, bottom = 0.dp)
                     .background(MaterialTheme.colorScheme.primary, shape = CircleShape)
             ) {
                 Icon(
@@ -411,26 +472,48 @@ fun SearchCard(toogleBottomSheet: () -> Unit) {
 }
 
 @Composable
-fun ShopCard() {
+fun ShopCard(imageUrl: String, name: String, shopId: String, isSelected: Boolean, onSelect: () -> Unit) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.widthIn(100.dp).heightIn(100.dp).padding(top = 5.dp, start = 0.dp, end = 5.dp),
+        modifier = Modifier
+            .widthIn(100.dp)
+            .heightIn(100.dp)
+            .padding(top = 5.dp, start = 0.dp, end = 5.dp)
+            .clickable {
+                onSelect()
+            },
     ) {
-
+        val opacity = if (isSelected) 1f else 1f
         Card(
             modifier = Modifier.width(50.dp).height(50.dp),
             shape = RoundedCornerShape(25.dp),
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.order),
+
+            if (isSelected) {
+                Icon(
+                    imageVector = Icons.Outlined.Check,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier
+                        .size(40.dp)
+                        .padding(top = 5.dp, start = 6.dp, end = 0.dp)
+                )
+            }
+
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data("${Utils.baseUrl}${imageUrl}")
+                    .crossfade(true)
+                    .build(),
+                placeholder = painterResource(R.drawable.wash_and_dry),
+                contentDescription = stringResource(R.string.app_name),
                 contentScale = ContentScale.Crop,
-                contentDescription = "order icon",
-                modifier = Modifier.width(60.dp).height(60.dp).padding(10.dp)
+                modifier = Modifier.width(60.dp).height(60.dp).padding(10.dp).graphicsLayer(alpha = opacity)
             )
         }
 
         Text(
-            text = "AndMore Dry cleaner",
+            text = name,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Center,
