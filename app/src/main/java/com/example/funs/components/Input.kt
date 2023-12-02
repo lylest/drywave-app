@@ -30,15 +30,16 @@ import com.example.funs.screens.profile.ProfileViewModel
 fun OutlinedInput(
     label: String,
     icon: ImageVector,
-    errorStatus:Boolean = true,
-    onTextSelected: (String) -> Unit) {
+    errorStatus: Boolean = true,
+    onTextSelected: (String) -> Unit
+) {
 
-    val textValue =  remember { mutableStateOf("") }
+    val textValue = remember { mutableStateOf("") }
 
     OutlinedTextField(
         value = textValue.value,
         onValueChange = {
-            textValue.value= it
+            textValue.value = it
             onTextSelected(it)
         },
         singleLine = true,
@@ -67,9 +68,10 @@ fun OutlinedPasswordInput(
     label: String,
     icon: ImageVector,
     errorStatus: Boolean = true,
-    onTextSelected: (String) -> Unit) {
+    onTextSelected: (String) -> Unit
+) {
 
-    var password= remember { mutableStateOf("") }
+    var password = remember { mutableStateOf("") }
 
     var passwordVisible = remember {
         mutableStateOf(false)
@@ -78,7 +80,7 @@ fun OutlinedPasswordInput(
     OutlinedTextField(
         value = password.value,
         onValueChange = {
-            password.value= it
+            password.value = it
             onTextSelected(it)
         },
         singleLine = true,
@@ -199,14 +201,14 @@ fun SearchShop(
     SearchBar(
         query = text,
         onQueryChange = {
-          text = it
+            text = it
             if (userId != null && currentUserToken != null) {
                 val tokenWithBearer = "Bearer $currentUserToken"
-                if(it.isNotEmpty()){ newOrderViewModel.searchShops(tokenWithBearer, it) } else {
+                if (it.isNotEmpty()) {
+                    newOrderViewModel.searchShops(tokenWithBearer, it)
+                } else {
                     newOrderViewModel.getSampleShops(tokenWithBearer)
                 }
-            } else {
-                println("current yser token $$currentUserToken and user id $userId")
             }
         },
         onSearch = {
@@ -263,22 +265,28 @@ fun SearchShop(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchItems() {
+fun SearchItems(
+    newOrderViewModel: NewOrderViewModel = viewModel(),
+    profileViewModel: ProfileViewModel = viewModel()
+) {
     var text by remember { mutableStateOf("") } // Query for SearchBar
     var active by remember { mutableStateOf(false) } // Active state for SearchBar
-    val items = remember {
-        mutableStateListOf(
-            "Alice",
-            "James",
-            "Cat",
-            "Sean"
-        )
-    }
+    val userId by profileViewModel.userId.observeAsState()
+    val currentUserToken by profileViewModel.currentUserToken.observeAsState()
+    val itemsList by newOrderViewModel.itemsList.observeAsState()
 
     DockedSearchBar(
         query = text,
         onQueryChange = {
             text = it
+            if (userId != null && currentUserToken != null) {
+                val tokenWithBearer = "Bearer $currentUserToken"
+                if (it.isNotEmpty()) {
+                    newOrderViewModel.searchItems(tokenWithBearer, it)
+                } else {
+
+                }
+            }
         },
         onSearch = {
             active = false
@@ -315,17 +323,59 @@ fun SearchItems() {
             .padding(top = 0.dp),
         shape = RoundedCornerShape(9.dp)
     ) {
-        items.forEach {
-            Row(modifier = Modifier.padding(all = 14.dp)) {
+        itemsList?.forEach { item ->
+            Row(modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 14.dp, end = 14.dp, top = 7.dp)
+                .clickable {
+                    active = false
+                    newOrderViewModel.addDescription(item)
+                }
+            ) {
                 Icon(
-                    modifier = Modifier.padding(end = 12.dp),
-                    imageVector = Icons.Outlined.History, contentDescription = null
+                    modifier = Modifier.padding(end = 12.dp, top = 12.dp, bottom = 12.dp),
+                    imageVector = Icons.Outlined.DryCleaning, contentDescription = null
                 )
-                Text(text = it)
+                Text(
+                    modifier = Modifier.padding(top = 12.dp, bottom = 12.dp),
+                    text = item.item
+                )
             }
         }
     }
 }
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DescriptionInput(
+    label: String,
+    onTextSelected: (String) -> Unit
+) {
+
+    val textValue = remember { mutableStateOf("") }
+
+    OutlinedTextField(
+        value = textValue.value,
+        onValueChange = {
+            textValue.value = it
+            onTextSelected(it)
+        },
+        singleLine = true,
+        label = { Text(label) },
+        colors = TextFieldDefaults.outlinedTextFieldColors(
+            focusedBorderColor = MaterialTheme.colorScheme.primary,
+            unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+            focusedLabelColor = MaterialTheme.colorScheme.primary,
+            cursorColor = MaterialTheme.colorScheme.onSurface
+        ),
+        modifier = Modifier
+            .height(120.dp)
+            .padding(top = 1.dp, start = 25.dp)
+            .fillMaxWidth(0.9f)
+    )
+}
+
 
 
 

@@ -5,9 +5,7 @@ import com.example.funs.utils.Utils
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.http.GET
-import retrofit2.http.Header
-import retrofit2.http.Query
+import retrofit2.http.*
 
 interface NewOrderService {
     @GET("read/shops?allOpenShops=all")
@@ -15,7 +13,6 @@ interface NewOrderService {
         @Header("Authorization") authToken: String?,
         @Header("Content-Type") contentType: String
     ): Response<ShopsResponse>
-
 
 
     @GET("read/shops")
@@ -26,11 +23,27 @@ interface NewOrderService {
     ): Response<ShopsResponse>
 
 
+    @POST("read/categories?minimalSearchShopItems=all")
+    suspend fun searchItem(
+        @Body searchItemBody: SearchItemBody,
+        @Header("Authorization") authToken: String?,
+        @Header("Content-Type") contentType: String
+    ): Response<ItemsResponse>
+
+
+    @POST("create/orders")
+    suspend fun createOrder(
+        @Body order: Order,
+        @Header("Authorization") authToken: String?,
+        @Header("Content-Type") contentType: String = Utils.contentType
+    ): Response<NewOrderResponse>
+
+
     companion object {
-        var getShopsRequest: NewOrderService? =  null
+        var getShopsRequest: NewOrderService? = null
 
         fun getInstance(): NewOrderService {
-            if(getShopsRequest == null) {
+            if (getShopsRequest == null) {
                 getShopsRequest = Retrofit.Builder()
                     .baseUrl(Utils.baseUrl)
                     .addConverterFactory(GsonConverterFactory.create())

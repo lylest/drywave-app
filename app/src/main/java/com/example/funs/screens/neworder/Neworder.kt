@@ -1,6 +1,7 @@
 package com.example.funs.screens.neworder
 
 import android.annotation.SuppressLint
+import android.widget.Toast
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -33,14 +34,19 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.funs.components.ButtonAdd
+import com.example.funs.components.DescriptionInput
 import com.example.funs.screens.home.ServiceType
 import com.example.funs.screens.profile.ProfileViewModel
 import com.example.funs.utils.Utils
+import java.text.NumberFormat
+import java.util.*
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -59,6 +65,7 @@ fun NewOrder(
     val userId by profileViewModel.userId.observeAsState()
     val currentUserToken by profileViewModel.currentUserToken.observeAsState()
     val servicesList by newOrderViewModel.servicesList.observeAsState()
+    val piecesList by newOrderViewModel.pieces.observeAsState()
 
 
     LaunchedEffect(key1 = userId) {
@@ -75,6 +82,13 @@ fun NewOrder(
             if (newOrderViewModel.selectedShop.value !== "empty") {
                 newOrderViewModel.getShopServices(tokenWithBearer, newOrderViewModel.selectedShop.value)
             }
+        }
+    }
+
+    val context = LocalContext.current
+    if (newOrderViewModel.showToast.value) {
+        LaunchedEffect(key1 = 1) {
+            Toast.makeText(context, newOrderViewModel.message.value, Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -163,16 +177,18 @@ fun NewOrder(
             }
 
 
-            Text(
-                text = "Pick a service",
-                modifier = Modifier.fillMaxWidth().heightIn().padding(top = 10.dp, start = 0.dp, bottom = 5.dp),
-                style = TextStyle(
-                    textAlign = TextAlign.Left,
-                    fontWeight = FontWeight.Normal,
-                    fontSize = 20.sp
-                ),
-                color = MaterialTheme.colorScheme.onSurface
-            )
+            if (newOrderViewModel.selectedShop.value != "empty") {
+                Text(
+                    text = "Pick a service",
+                    modifier = Modifier.fillMaxWidth().heightIn().padding(top = 10.dp, start = 0.dp, bottom = 5.dp),
+                    style = TextStyle(
+                        textAlign = TextAlign.Left,
+                        fontWeight = FontWeight.Normal,
+                        fontSize = 20.sp
+                    ),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
 
             val scrollState = rememberScrollState()
             Row(
@@ -183,29 +199,36 @@ fun NewOrder(
                     ServiceType(
                         service.icon.path,
                         service.name,
-                        { newOrderViewModel.selectService(service._id) },
+                        { newOrderViewModel.selectService(service._id, service.code) },
                         newOrderViewModel.selectedService.value == service._id
                     )
                 }
             }
 
 
+            if (newOrderViewModel.selectedService.value !== "empty") {
+                Text(
+                    text = "Add items",
+                    modifier = Modifier.fillMaxWidth().heightIn().padding(top = 25.dp, start = 0.dp, bottom = 14.dp),
+                    style = TextStyle(
+                        textAlign = TextAlign.Left,
+                        fontWeight = FontWeight.Normal,
+                        fontSize = 20.sp
+                    ),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                SearchItems()
+            }
 
-            Text(
-                text = "Add items",
-                modifier = Modifier.fillMaxWidth().heightIn().padding(top = 25.dp, start = 0.dp, bottom = 14.dp),
-                style = TextStyle(
-                    textAlign = TextAlign.Left,
-                    fontWeight = FontWeight.Normal,
-                    fontSize = 20.sp
-                ),
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            SearchItems()
+            if (newOrderViewModel.isVisible.value) {
+                DescriptionDialog ({ newOrderViewModel.isVisible.value = false })
+            }
+
             Spacer(modifier = Modifier.height(15.dp))
-            PieceBar()
-            PieceBar()
-            PieceBar()
+            piecesList?.forEach { piece ->
+                PieceBar(piece)
+            }
+
 
             Spacer(modifier = Modifier.height(30.dp))
             DashedDivider(
@@ -219,8 +242,10 @@ fun NewOrder(
             TotalPieces()
             Spacer(modifier = Modifier.height(30.dp))
 
-            ButtonAdd("Place order")
-
+            ButtonAdd(
+                "Place order",
+                newOrderViewModel.total.value <= 0
+            )
             Spacer(modifier = Modifier.height(70.dp))
         }
     }
@@ -253,7 +278,7 @@ fun DashedDivider(
 }
 
 @Composable
-fun TotalPieces() {
+fun TotalPieces( newOrderViewModel: NewOrderViewModel = viewModel()) {
     Row(modifier = Modifier.fillMaxWidth()) {
         Box(
             modifier = Modifier
@@ -270,7 +295,7 @@ fun TotalPieces() {
                 color = MaterialTheme.colorScheme.outline
             )
             Text(
-                text = "12 Pieces",
+                text = "${newOrderViewModel.quantity.value} Pieces",
                 modifier = Modifier
                     .padding(top = 30.dp, start = 10.dp, bottom = 5.dp),
                 style = TextStyle(
@@ -296,7 +321,7 @@ fun TotalPieces() {
                 color = MaterialTheme.colorScheme.outline
             )
             Text(
-                text = "145,000",
+                text = NumberFormat.getNumberInstance(Locale.US).format(newOrderViewModel.total.value),
                 modifier = Modifier
                     .padding(top = 30.dp, start = 10.dp, bottom = 5.dp),
                 style = TextStyle(
@@ -311,7 +336,10 @@ fun TotalPieces() {
 }
 
 @Composable
-fun PieceBar() {
+fun PieceBar(
+    piece:Piece,
+    newOrderViewModel: NewOrderViewModel = viewModel()
+ ) {
     Row(
         modifier = Modifier.padding(top = 20.dp)
     ) {
@@ -328,7 +356,7 @@ fun PieceBar() {
         ) {
             Icon(
                 imageVector = Icons.Outlined.DryCleaning,
-                tint = MaterialTheme.colorScheme.outline,
+                tint = Color(android.graphics.Color.parseColor(piece.color.code)),
                 contentDescription = null,
                 modifier = Modifier.width(50.dp).height(50.dp)
             )
@@ -336,7 +364,7 @@ fun PieceBar() {
 
         Column {
             Text(
-                text = "Suit 3PCS",
+                text = piece.name,
                 modifier = Modifier
                     .padding(top = 10.dp, start = 10.dp, bottom = 0.dp),
                 style = TextStyle(
@@ -348,7 +376,7 @@ fun PieceBar() {
             )
 
             Text(
-                text = "3 Pieces",
+                text = "${NumberFormat.getNumberInstance(Locale.US).format(piece.pieces)} pieces",
                 modifier = Modifier.padding(top = 4.dp, start = 10.dp, bottom = 0.dp),
                 style = TextStyle(
                     textAlign = TextAlign.Left,
@@ -360,7 +388,7 @@ fun PieceBar() {
 
             Row {
                 Text(
-                    text = "10,000",
+                    text =  NumberFormat.getNumberInstance(Locale.US).format(piece.unitPrice),
                     modifier = Modifier
                         .padding(top = 4.dp, start = 10.dp, bottom = 5.dp),
                     style = TextStyle(
@@ -391,6 +419,7 @@ fun PieceBar() {
                     .height(55.dp)
                     .padding(top = 20.dp, start = 10.dp, end = 10.dp, bottom = 0.dp)
                     .background(MaterialTheme.colorScheme.primaryContainer, shape = CircleShape)
+                    .clickable {  newOrderViewModel.decrementQuantity(piece) }
             ) {
                 Icon(
                     imageVector = Icons.Outlined.Remove,
@@ -400,7 +429,7 @@ fun PieceBar() {
             }
 
             Text(
-                text = "1",
+                text =  NumberFormat.getNumberInstance(Locale.US).format(piece.quantity),
                 modifier = Modifier.padding(top = 22.dp, start = 0.dp, bottom = 5.dp),
                 style = TextStyle(
                     textAlign = TextAlign.Left,
@@ -417,6 +446,7 @@ fun PieceBar() {
                     .height(55.dp)
                     .padding(top = 20.dp, start = 10.dp, end = 10.dp, bottom = 0.dp)
                     .background(MaterialTheme.colorScheme.primary, shape = CircleShape)
+                    .clickable { newOrderViewModel.incrementQuantity(piece) }
             ) {
                 Icon(
                     imageVector = Icons.Outlined.Add,
@@ -461,10 +491,7 @@ fun SearchCard(toogleBottomSheet: () -> Unit) {
             modifier = Modifier
                 .padding(8.dp)
                 .width(90.dp),
-            style = TextStyle(
-                fontWeight = FontWeight.Normal,
-
-                )
+            style = TextStyle(fontWeight = FontWeight.Normal)
         )
     }
 
@@ -528,4 +555,119 @@ fun ShopCard(imageUrl: String, name: String, shopId: String, isSelected: Boolean
     }
 
 
+}
+
+@Composable
+fun DescriptionDialog(
+    onDismissRequest: () -> Unit,
+    newOrderViewModel: NewOrderViewModel = viewModel()
+) {
+    Dialog( onDismissRequest = { onDismissRequest() }) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(400.dp)
+                .padding(16.dp),
+            shape = RoundedCornerShape(16.dp),
+        ) {
+            Text(
+                text = "Description",
+                modifier = Modifier.fillMaxWidth().heightIn().padding(top = 20.dp, start = 23.dp, bottom = 0.dp),
+                style = TextStyle(
+                    textAlign = TextAlign.Left,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 20.sp
+                ),
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            DescriptionInput("description") { newOrderViewModel.description.value = it }
+
+            Text(
+                text = "Pick a color",
+                modifier = Modifier.fillMaxWidth().heightIn().padding(top = 20.dp, start = 20.dp, bottom = 0.dp),
+                style = TextStyle(
+                    textAlign = TextAlign.Left,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 20.sp
+                ),
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            val scrollState = rememberScrollState()
+            Row(modifier = Modifier
+                .padding(start = 20.dp)
+                .horizontalScroll(scrollState)
+            ) {
+
+                for (i in 1..50) {
+                    val color = Colors.values()[i - 1]
+                    Box(
+                        modifier = Modifier
+                            .width(60.dp)
+                            .height(60.dp)
+                            .padding(5.dp)
+                            .clickable {
+                                newOrderViewModel.selectedColor.value = Color(
+                                    id = color.id,
+                                    colorName = color.colorName,
+                                    code = color.code,
+                                    kisw = color.kisw
+                                )
+                            }
+                            .background(Color(android.graphics.Color.parseColor(color.code)), shape = CircleShape),
+                    ) {
+                        val isColorSelected = newOrderViewModel.selectedColor.value?.code == color.code
+                        if (isColorSelected) {
+                            Icon(
+                                imageVector = Icons.Outlined.Check,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.outline,
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .padding(top = 5.dp, start = 6.dp, end = 0.dp)
+                            )
+                        }
+                    }
+                }
+            }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+            ) {
+                TextButton(
+                    onClick = { onDismissRequest() },
+                    modifier = Modifier.padding(8.dp),
+                ) {
+                    Text("Dismiss")
+                }
+                TextButton(
+                    onClick = {  newOrderViewModel.addPiece() },
+                    modifier = Modifier.padding(8.dp),
+                ) {
+                    Text("Confirm")
+                }
+            }
+        }
+    }
+}
+
+
+@Composable
+fun CircularIndicator() {
+    Row(
+        modifier = Modifier
+            .width(40.dp)
+            .height(40.dp)
+            .padding(5.dp),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        CircularProgressIndicator(
+            modifier = Modifier.width(20.dp),
+            color = MaterialTheme.colorScheme.secondary,
+            trackColor = MaterialTheme.colorScheme.surfaceVariant,
+        )
+    }
 }

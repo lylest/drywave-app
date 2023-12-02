@@ -196,9 +196,7 @@ fun ViewOrder(navController: NavController) {
                 .fillMaxWidth(0.94f)
                 .padding(start = 24.dp, top = 4.dp)
         ) {
-            PieceBar()
-            PieceBar()
-            PieceBar()
+
 
             Spacer(modifier = Modifier.height(30.dp))
             DashedDivider(
