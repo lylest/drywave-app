@@ -3,6 +3,7 @@ package com.example.funs.screens.neworder
 import android.app.Application
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.*
+import androidx.navigation.NavController
 import com.example.funs.screens.home.CleaningService
 import com.example.funs.screens.home.HomeService
 import com.example.funs.screens.home.SampleCleaningServiceResponse
@@ -14,7 +15,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.random.Random
 
-class NewOrderViewModel(application: Application) : AndroidViewModel(application) {
+class NewOrderViewModel(application: Application ) : AndroidViewModel(application) {
     private val dataStoreManager: DataStoreManager = DataStoreManager(application)
     var message = mutableStateOf("")
     var showToast = mutableStateOf(false)
@@ -32,6 +33,7 @@ class NewOrderViewModel(application: Application) : AndroidViewModel(application
     val total = mutableStateOf(0)
     val quantity = mutableStateOf(0)
     val isLoading = mutableStateOf(false)
+    val orderId = mutableStateOf("empty")
 
 
     fun incrementQuantity(piece: Piece) {
@@ -321,8 +323,7 @@ class NewOrderViewModel(application: Application) : AndroidViewModel(application
                     message.value = response.body()?.message.toString()
                     showToast.value = true
                     isLoading.value = false
-
-                    println(response.body()?.data?._id)
+                    orderId.value = response.body()?.data?._id.toString()
                 } else {
                     val error = response.errorBody()?.let {
                         Gson().fromJson(it.string(), ShopsResponse::class.java)

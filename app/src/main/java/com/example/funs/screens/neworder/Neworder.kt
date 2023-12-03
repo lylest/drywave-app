@@ -85,6 +85,12 @@ fun NewOrder(
         }
     }
 
+    if(newOrderViewModel.orderId.value !== "empty") {
+        LaunchedEffect(key1 = 1) {
+            navController.navigate("view_order")
+        }
+    }
+
     val context = LocalContext.current
     if (newOrderViewModel.showToast.value) {
         LaunchedEffect(key1 = 1) {
@@ -278,7 +284,9 @@ fun DashedDivider(
 }
 
 @Composable
-fun TotalPieces( newOrderViewModel: NewOrderViewModel = viewModel()) {
+fun TotalPieces(
+    newOrderViewModel: NewOrderViewModel = viewModel()
+) {
     Row(modifier = Modifier.fillMaxWidth()) {
         Box(
             modifier = Modifier
@@ -338,6 +346,7 @@ fun TotalPieces( newOrderViewModel: NewOrderViewModel = viewModel()) {
 @Composable
 fun PieceBar(
     piece:Piece,
+    adjustable:Boolean = true,
     newOrderViewModel: NewOrderViewModel = viewModel()
  ) {
     Row(
@@ -411,50 +420,52 @@ fun PieceBar(
             }
         }
 
-        Row {
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .width(55.dp)
-                    .height(55.dp)
-                    .padding(top = 20.dp, start = 10.dp, end = 10.dp, bottom = 0.dp)
-                    .background(MaterialTheme.colorScheme.primaryContainer, shape = CircleShape)
-                    .clickable {  newOrderViewModel.decrementQuantity(piece) }
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.Remove,
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                    contentDescription = null
-                )
-            }
+       if(adjustable) {
+           Row {
+               Box(
+                   contentAlignment = Alignment.Center,
+                   modifier = Modifier
+                       .width(55.dp)
+                       .height(55.dp)
+                       .padding(top = 20.dp, start = 10.dp, end = 10.dp, bottom = 0.dp)
+                       .background(MaterialTheme.colorScheme.primaryContainer, shape = CircleShape)
+                       .clickable {  newOrderViewModel.decrementQuantity(piece) }
+               ) {
+                   Icon(
+                       imageVector = Icons.Outlined.Remove,
+                       tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                       contentDescription = null
+                   )
+               }
 
-            Text(
-                text =  NumberFormat.getNumberInstance(Locale.US).format(piece.quantity),
-                modifier = Modifier.padding(top = 22.dp, start = 0.dp, bottom = 5.dp),
-                style = TextStyle(
-                    textAlign = TextAlign.Left,
-                    fontWeight = FontWeight.Normal,
-                    fontSize = 18.sp
-                ),
-                color = MaterialTheme.colorScheme.onBackground
-            )
+               Text(
+                   text =  NumberFormat.getNumberInstance(Locale.US).format(piece.quantity),
+                   modifier = Modifier.padding(top = 22.dp, start = 0.dp, bottom = 5.dp),
+                   style = TextStyle(
+                       textAlign = TextAlign.Left,
+                       fontWeight = FontWeight.Normal,
+                       fontSize = 18.sp
+                   ),
+                   color = MaterialTheme.colorScheme.onBackground
+               )
 
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .width(55.dp)
-                    .height(55.dp)
-                    .padding(top = 20.dp, start = 10.dp, end = 10.dp, bottom = 0.dp)
-                    .background(MaterialTheme.colorScheme.primary, shape = CircleShape)
-                    .clickable { newOrderViewModel.incrementQuantity(piece) }
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.Add,
-                    tint = MaterialTheme.colorScheme.onPrimary,
-                    contentDescription = null
-                )
-            }
-        }
+               Box(
+                   contentAlignment = Alignment.Center,
+                   modifier = Modifier
+                       .width(55.dp)
+                       .height(55.dp)
+                       .padding(top = 20.dp, start = 10.dp, end = 10.dp, bottom = 0.dp)
+                       .background(MaterialTheme.colorScheme.primary, shape = CircleShape)
+                       .clickable { newOrderViewModel.incrementQuantity(piece) }
+               ) {
+                   Icon(
+                       imageVector = Icons.Outlined.Add,
+                       tint = MaterialTheme.colorScheme.onPrimary,
+                       contentDescription = null
+                   )
+               }
+           }
+       }
     }
 }
 

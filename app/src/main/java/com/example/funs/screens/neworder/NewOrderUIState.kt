@@ -2,20 +2,20 @@ package com.example.funs.screens.neworder
 
 import com.example.funs.screens.home.Icon
 
-data class  ShopsResponse (
+data class ShopsResponse(
     var message: String = "",
-    var data:  List<Shop> = listOf()
+    var data: List<Shop> = listOf()
 )
 
-data class Shop (
-    var _id: String= "",
+data class Shop(
+    var _id: String = "",
     var name: String = "",
     var logo: Icon = Icon()
 )
 
-data class  ItemsResponse (
+data class ItemsResponse(
     var message: String = "",
-    var data:MutableList<Item>
+    var data: MutableList<Item>
 )
 
 data class Item(
@@ -26,12 +26,12 @@ data class Item(
     var shop: String
 )
 
-data class SearchItemBody (
-     var shopId: String ="",
-     var query: String =""
+data class SearchItemBody(
+    var shopId: String = "",
+    var query: String = ""
 )
 
-data class Piece (
+data class Piece(
     var id: String,
     var category: String,
     var categoryPieces: Int,
@@ -68,34 +68,24 @@ data class Order(
     val checkoutCode: String,
     val isExpress: Boolean,
     val totalPieces: Int,
-    val orderStatus:String
+    val orderStatus: String
 )
 
-data class  ExtendOrder (
-     val _id: String,
-     val customer: String,
-     val shop: String,
-     val service: String,
-     val pieces: MutableList<Piece>,
-     val totalCost: Int,
-     val discount: Int,
-     val amountPaid: Int,
-     val defects: List<Inspection> = emptyList(),
-     val dateReceived: String,
-     val readyDate: String,
-     val paymentStatus: String,
-     val paymentMethod: String,
-     val trackingId: String,
-     val checkoutCode: String,
-     val isExpress: Boolean,
-     val totalPieces: Int,
-     val orderStatus:String
+data class ExtendOrder(
+    val _id: String,
+    val dateReceived: String,
+    val readyDate: String,
+    val paymentStatus: String,
+    val trackingId: String,
+    val orderStatus: String,
+    val progress: String
 )
-data class Inspection (
+
+data class Inspection(
     val name: String = ""
 )
 
-data class  NewOrderResponse (
+data class NewOrderResponse(
     var message: String,
     var data: ExtendOrder
 )

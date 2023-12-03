@@ -7,8 +7,15 @@ sealed class Screen (val route: String){
     object OrderScreen: Screen("orders")
     object ProfileScreen: Screen("profile")
     object NewOrder: Screen("new_order")
-
     object  ViewOrder: Screen("view_order")
-
     object Notifications: Screen("notifications")
+
+    fun withArgs (vararg args :String): String {
+        return buildString {
+            append(route)
+            args.forEach {arg ->
+                append("/$arg")
+            }
+        }
+    }
 }
