@@ -1,4 +1,5 @@
-package com.example.funs.screens.neworder
+package com.example.funs.screens.editorder
+
 
 import android.annotation.SuppressLint
 import android.widget.Toast
@@ -28,8 +29,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.funs.R
-import com.example.funs.components.SearchItems
-import com.example.funs.components.SearchShop
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
@@ -37,14 +36,18 @@ import androidx.compose.ui.res.stringResource
 
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.example.funs.components.ButtonAdd
-import com.example.funs.components.DescriptionInput
+import com.example.funs.components.*
 import com.example.funs.navigation.Screen
 import com.example.funs.screens.home.ServiceType
+import com.example.funs.screens.neworder.Colors
+import com.example.funs.screens.neworder.NewOrderViewModel
+import com.example.funs.screens.neworder.Piece
 import com.example.funs.screens.profile.ProfileViewModel
+import com.example.funs.screens.vieworder.OrderViewModel
 import com.example.funs.utils.Utils
 import java.text.NumberFormat
 import java.util.*
@@ -54,10 +57,12 @@ import java.util.*
 @OptIn(ExperimentalMaterial3Api::class)
 
 @Composable
-fun NewOrder(
+fun EditOrder(
+    orderId: String?,
     navController: NavController,
     profileViewModel: ProfileViewModel = viewModel(),
-    newOrderViewModel: NewOrderViewModel = viewModel()
+    newOrderViewModel: NewOrderViewModel = viewModel(),
+    orderViewModel: OrderViewModel = viewModel()
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
     val sheetState = rememberModalBottomSheetState()
@@ -67,6 +72,33 @@ fun NewOrder(
     val currentUserToken by profileViewModel.currentUserToken.observeAsState()
     val servicesList by newOrderViewModel.servicesList.observeAsState()
     val piecesList by newOrderViewModel.pieces.observeAsState()
+    val order = orderViewModel.order.value
+
+    LaunchedEffect(key1 = userId) {
+        if (userId != null && currentUserToken != null) {
+            val tokenWithBearer = "Bearer $currentUserToken"
+            if (orderId != null) {
+                orderViewModel.getOrder(orderId, tokenWithBearer)
+            }
+        }
+    }
+
+    LaunchedEffect(key1 = order) {
+        if (order !== null) {
+            newOrderViewModel.selectedShop.value = order.shop._id
+            newOrderViewModel.selectedService.value = order.service._id
+            newOrderViewModel.serviceCode.value = order.service.code
+            newOrderViewModel.total.value = order.totalCost
+            newOrderViewModel.quantity.value = order.totalPieces
+
+            val currentPieces = MutableLiveData<MutableList<Piece>>()
+            order.pieces.map { piece ->
+                currentPieces.postValue(piece)
+            }
+            newOrderViewModel.pieces = currentPieces
+            newOrderViewModel.calcTotalAndQuantity(currentPieces)
+        }
+    }
 
 
     LaunchedEffect(key1 = userId) {
@@ -86,7 +118,7 @@ fun NewOrder(
         }
     }
 
-    if(newOrderViewModel.orderId.value !== "empty") {
+    if (newOrderViewModel.orderId.value !== "empty") {
         LaunchedEffect(key1 = 1) {
             navController.navigate(Screen.ViewOrder.withArgs(newOrderViewModel.orderId.value))
         }
@@ -99,11 +131,9 @@ fun NewOrder(
         }
     }
 
-
     fun toggleBottomSheet() {
         showBottomSheet = true
     }
-
 
     Scaffold(
         modifier = Modifier
@@ -138,7 +168,7 @@ fun NewOrder(
                 .background(MaterialTheme.colorScheme.surface)
         ) {
             Text(
-                text = "New order",
+                text = "Edit order",
                 modifier = Modifier.fillMaxWidth().heightIn().padding(top = 15.dp, start = 24.dp),
                 style = TextStyle(
                     textAlign = TextAlign.Left,
@@ -228,7 +258,7 @@ fun NewOrder(
             }
 
             if (newOrderViewModel.isVisible.value) {
-                DescriptionDialog ({ newOrderViewModel.isVisible.value = false })
+                DescriptionDialog({ newOrderViewModel.isVisible.value = false })
             }
 
             Spacer(modifier = Modifier.height(15.dp))
@@ -249,15 +279,28 @@ fun NewOrder(
             TotalPieces()
             Spacer(modifier = Modifier.height(30.dp))
 
-            ButtonAdd(
-                "Place order",
-                newOrderViewModel.total.value <= 0
-            )
+            if (orderId != null) {
+                if (order != null) {
+                    ButtonSaveOrder(
+                        order,
+                        orderId,
+                        "Save order",
+                        newOrderViewModel.total.value <= 0
+                    )
+                }
+            }
             Spacer(modifier = Modifier.height(70.dp))
         }
     }
 
 }
+
+    fun <T> MutableLiveData<MutableList<T>>.postValue(value: T) {
+        val list = this.value ?: mutableListOf()
+        list.add(value)
+        this.postValue(list)
+    }
+
 
 @Composable
 fun DashedDivider(
@@ -346,10 +389,10 @@ fun TotalPieces(
 
 @Composable
 fun PieceBar(
-    piece:Piece,
-    adjustable:Boolean = true,
+    piece: Piece,
+    adjustable: Boolean = true,
     newOrderViewModel: NewOrderViewModel = viewModel()
- ) {
+) {
     Row(
         modifier = Modifier.padding(top = 20.dp)
     ) {
@@ -361,7 +404,6 @@ fun PieceBar(
                 .padding(top = 5.dp, start = 0.dp, end = 5.dp)
                 .background(
                     MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(6.dp)
-                    //.clickable()
                 ),
         ) {
             Icon(
@@ -398,7 +440,7 @@ fun PieceBar(
 
             Row {
                 Text(
-                    text =  NumberFormat.getNumberInstance(Locale.US).format(piece.unitPrice),
+                    text = NumberFormat.getNumberInstance(Locale.US).format(piece.unitPrice),
                     modifier = Modifier
                         .padding(top = 4.dp, start = 10.dp, bottom = 5.dp),
                     style = TextStyle(
@@ -421,52 +463,52 @@ fun PieceBar(
             }
         }
 
-       if(adjustable) {
-           Row {
-               Box(
-                   contentAlignment = Alignment.Center,
-                   modifier = Modifier
-                       .width(55.dp)
-                       .height(55.dp)
-                       .padding(top = 20.dp, start = 10.dp, end = 10.dp, bottom = 0.dp)
-                       .background(MaterialTheme.colorScheme.primaryContainer, shape = CircleShape)
-                       .clickable {  newOrderViewModel.decrementQuantity(piece) }
-               ) {
-                   Icon(
-                       imageVector = Icons.Outlined.Remove,
-                       tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                       contentDescription = null
-                   )
-               }
+        if (adjustable) {
+            Row {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .width(55.dp)
+                        .height(55.dp)
+                        .padding(top = 20.dp, start = 10.dp, end = 10.dp, bottom = 0.dp)
+                        .background(MaterialTheme.colorScheme.primaryContainer, shape = CircleShape)
+                        .clickable { newOrderViewModel.decrementQuantity(piece) }
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Remove,
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                        contentDescription = null
+                    )
+                }
 
-               Text(
-                   text =  NumberFormat.getNumberInstance(Locale.US).format(piece.quantity),
-                   modifier = Modifier.padding(top = 22.dp, start = 0.dp, bottom = 5.dp),
-                   style = TextStyle(
-                       textAlign = TextAlign.Left,
-                       fontWeight = FontWeight.Normal,
-                       fontSize = 18.sp
-                   ),
-                   color = MaterialTheme.colorScheme.onBackground
-               )
+                Text(
+                    text = NumberFormat.getNumberInstance(Locale.US).format(piece.quantity),
+                    modifier = Modifier.padding(top = 22.dp, start = 0.dp, bottom = 5.dp),
+                    style = TextStyle(
+                        textAlign = TextAlign.Left,
+                        fontWeight = FontWeight.Normal,
+                        fontSize = 18.sp
+                    ),
+                    color = MaterialTheme.colorScheme.onBackground
+                )
 
-               Box(
-                   contentAlignment = Alignment.Center,
-                   modifier = Modifier
-                       .width(55.dp)
-                       .height(55.dp)
-                       .padding(top = 20.dp, start = 10.dp, end = 10.dp, bottom = 0.dp)
-                       .background(MaterialTheme.colorScheme.primary, shape = CircleShape)
-                       .clickable { newOrderViewModel.incrementQuantity(piece) }
-               ) {
-                   Icon(
-                       imageVector = Icons.Outlined.Add,
-                       tint = MaterialTheme.colorScheme.onPrimary,
-                       contentDescription = null
-                   )
-               }
-           }
-       }
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .width(55.dp)
+                        .height(55.dp)
+                        .padding(top = 20.dp, start = 10.dp, end = 10.dp, bottom = 0.dp)
+                        .background(MaterialTheme.colorScheme.primary, shape = CircleShape)
+                        .clickable { newOrderViewModel.incrementQuantity(piece) }
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Add,
+                        tint = MaterialTheme.colorScheme.onPrimary,
+                        contentDescription = null
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -574,7 +616,7 @@ fun DescriptionDialog(
     onDismissRequest: () -> Unit,
     newOrderViewModel: NewOrderViewModel = viewModel()
 ) {
-    Dialog( onDismissRequest = { onDismissRequest() }) {
+    Dialog(onDismissRequest = { onDismissRequest() }) {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -606,9 +648,10 @@ fun DescriptionDialog(
             )
 
             val scrollState = rememberScrollState()
-            Row(modifier = Modifier
-                .padding(start = 20.dp)
-                .horizontalScroll(scrollState)
+            Row(
+                modifier = Modifier
+                    .padding(start = 20.dp)
+                    .horizontalScroll(scrollState)
             ) {
 
                 for (i in 1..50) {
@@ -619,7 +662,7 @@ fun DescriptionDialog(
                             .height(60.dp)
                             .padding(5.dp)
                             .clickable {
-                                newOrderViewModel.selectedColor.value = Color(
+                                newOrderViewModel.selectedColor.value = com.example.funs.screens.neworder.Color(
                                     id = color.id,
                                     colorName = color.colorName,
                                     code = color.code,
@@ -655,7 +698,7 @@ fun DescriptionDialog(
                     Text("Dismiss")
                 }
                 TextButton(
-                    onClick = {  newOrderViewModel.addPiece() },
+                    onClick = { newOrderViewModel.addPiece() },
                     modifier = Modifier.padding(8.dp),
                 ) {
                     Text("Confirm")

@@ -7,6 +7,7 @@ import androidx.navigation.NavController
 import com.example.funs.screens.home.CleaningService
 import com.example.funs.screens.home.HomeService
 import com.example.funs.screens.home.SampleCleaningServiceResponse
+import com.example.funs.screens.vieworder.OrderDetails
 import com.example.funs.utils.DataStoreManager
 import com.example.funs.utils.Utils
 import com.google.gson.Gson
@@ -118,16 +119,20 @@ class NewOrderViewModel(application: Application ) : AndroidViewModel(applicatio
         }
     }
 
-    private fun calcTotalAndQuantity(items: MutableLiveData<MutableList<Piece>>) {
+     fun calcTotalAndQuantity(items: MutableLiveData<MutableList<Piece>>) {
+
         var totalPrice = 0
         var totalPieces = 0
 
-        for (item in pieces.value!!) {
-            totalPrice += item.itemTotal
-            totalPieces += item.pieces
-        }
-        total.value = totalPrice
-        quantity.value = totalPieces
+       if(items.value !== null) {
+           for (item in items.value!!) {
+               totalPrice += item.itemTotal
+               totalPieces += item.pieces
+           }
+           total.value = totalPrice
+           quantity.value = totalPieces
+       }
+
     }
 
     private fun getCurrentDate(): String {
@@ -327,6 +332,61 @@ class NewOrderViewModel(application: Application ) : AndroidViewModel(applicatio
                 } else {
                     val error = response.errorBody()?.let {
                         Gson().fromJson(it.string(), ShopsResponse::class.java)
+                    }
+                    showToast.value = true
+                    isLoading.value = false
+                    message.value = error?.message.toString()
+                }
+            } catch (e: Exception) {
+                message.value = e.message.toString()
+                showToast.value = true
+                isLoading.value = false
+            }
+        }
+    }
+
+    fun updateOrder(orderId:String, customerToken: String, customerId: String, order:OrderDetails) {
+        showToast.value = false
+        message.value = ""
+        isLoading.value = true
+
+        viewModelScope.launch {
+            val updateOrder = NewOrderService.getInstance()
+            val newTrackingId = order.trackingId.replaceFirstChar { quantity.value.toString() }
+            val newCheckOutCode = order.trackingId.replaceFirstChar { quantity.value.toString()  }
+
+            try {
+                val response =updateOrder.updateOrder(
+                    orderId,
+                    Order(
+                        customer = customerId,
+                        shop = selectedShop.value,
+                        service = selectedService.value,
+                        pieces = pieces.value!!,
+                        totalCost = total.value,
+                        discount = order.discount,
+                        amountPaid = order.amountPaid,
+                        dateReceived = order.dateReceived,
+                        readyDate = order.readyDate,
+                        paymentStatus = order.paymentStatus,
+                        paymentMethod = order.paymentMethod,
+                        trackingId = newTrackingId,
+                        checkoutCode = newCheckOutCode,
+                        isExpress = order.isExpress,
+                        totalPieces = quantity.value,
+                        orderStatus = order.orderStatus
+                    ),
+                    customerToken, Utils.contentType
+                )
+
+                if (response.isSuccessful) {
+                    message.value = response.body()?.message.toString()
+                    showToast.value = true
+                    isLoading.value = false
+
+                } else {
+                    val error = response.errorBody()?.let {
+                        Gson().fromJson(it.string(), NewOrderResponse::class.java)
                     }
                     showToast.value = true
                     isLoading.value = false

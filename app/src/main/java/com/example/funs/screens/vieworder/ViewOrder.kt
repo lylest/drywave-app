@@ -19,6 +19,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -34,6 +35,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.funs.R
 import com.example.funs.components.MenuItem
+import com.example.funs.navigation.Screen
 import com.example.funs.screens.home.CircularProgress
 import com.example.funs.screens.home.HomeViewModel
 import com.example.funs.screens.neworder.DashedDivider
@@ -59,6 +61,7 @@ fun ViewOrder(
     var order = orderViewModel.order.value
     val userId by profileViewModel.userId.observeAsState()
     val currentUserToken by profileViewModel.currentUserToken.observeAsState()
+    var showDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(key1 = userId, key2 = orderId) {
         if (userId != null && currentUserToken != null) {
@@ -70,11 +73,13 @@ fun ViewOrder(
         }
     }
 
-
     val context = LocalContext.current
     if (orderViewModel.showToast.value) {
         LaunchedEffect(key1 = 1) {
             Toast.makeText(context, orderViewModel.message.value, Toast.LENGTH_SHORT).show()
+        }
+        if(orderViewModel.message.value == "Order Cancelled") {
+            navController.navigate("home")
         }
     }
 
@@ -300,14 +305,6 @@ fun ViewOrder(
                    )
                }
 
-               MenuItem(
-                   Icons.Outlined.CheckBox,
-                   "Tears evide",
-                   "",
-                   MaterialTheme.colorScheme.primary
-               )
-
-
                Text(
                    text = "Menu",
                    modifier = Modifier.fillMaxWidth().heightIn().padding(top = 17.dp, start = 24.dp),
@@ -319,6 +316,21 @@ fun ViewOrder(
                    color = MaterialTheme.colorScheme.onSurface
                )
 
+               if(showDialog) {
+                   ConfirmDialog(
+                       onDismissRequest = { showDialog = false },
+                       {
+                           if (orderId != null && currentUserToken != null) {
+                               val tokenWithBearer = "Bearer $currentUserToken"
+                               orderViewModel.cancelOrder(orderId, tokenWithBearer)
+                               showDialog = false
+                           }
+                       },
+                       "Cancel order",
+                       "Are you sure do you want to cancel this order ?",
+                       Icons.Outlined.DryCleaning
+                   )
+               }
                Row(
                    modifier = Modifier
                        .fillMaxWidth(0.94f)
@@ -326,7 +338,7 @@ fun ViewOrder(
                ) {
 
                    FilledTonalButton(
-                       onClick = { },
+                       onClick = { showDialog = true },
                        modifier = Modifier.padding(10.dp),
                        shape = RoundedCornerShape(6.dp),
                        colors = ButtonDefaults.filledTonalButtonColors(MaterialTheme.colorScheme.errorContainer)
@@ -343,10 +355,11 @@ fun ViewOrder(
 
 
                    Button(
-                       onClick = { },
+                       onClick = {
+                           navController.navigate(Screen.EditOrder.withArgs(order._id))
+                       },
                        shape = RoundedCornerShape(6.dp),
                        modifier = Modifier.padding(10.dp),
-                       // colors = ButtonDefaults.FilledButtonColors(MaterialTheme.colorScheme.primaryContainer)
                    ) {
                        Text(
                            "Edit order",
@@ -535,4 +548,35 @@ fun TotalPiecesBar(
             )
         }
     }
+}
+
+@Composable
+fun ConfirmDialog(
+    onDismissRequest: () -> Unit,
+    onConfirmation: () -> Unit,
+    dialogTitle: String,
+    dialogText: String,
+    icon: ImageVector,
+) {
+
+    AlertDialog(
+        icon = { Icon(icon, contentDescription = "Example Icon") },
+        title = { Text(text = dialogTitle) },
+        text = { Text(text = dialogText) },
+        onDismissRequest = { onDismissRequest() },
+        confirmButton = {
+            TextButton(
+                onClick = { onConfirmation() }
+            ) {
+                Text("Yes")
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = { onDismissRequest() }
+            ) {
+                Text("No")
+            }
+        }
+    )
 }

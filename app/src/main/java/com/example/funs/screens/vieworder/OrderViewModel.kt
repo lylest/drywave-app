@@ -27,13 +27,12 @@ class OrderViewModel(application: Application) : AndroidViewModel(application) {
 
             try {
                 val response = orderService.getOrderDetails(orderId, customerToken, Utils.contentType)
-                println(response.raw())
                 if (response.isSuccessful) {
                     refreshing.value = false
                     order.value = response.body()?.data!!
                 } else {
                     val error = response.errorBody()?.let {
-                        Gson().fromJson(it.string(), SampleCleaningServiceResponse::class.java)
+                        Gson().fromJson(it.string(), OrderDetailsResponse::class.java)
                     }
                     refreshing.value = false
                     showToast.value = true
@@ -46,5 +45,43 @@ class OrderViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
     }
+
+    fun cancelOrder(orderId: String, customerToken: String) {
+        showToast.value = false
+        message.value = ""
+        refreshing.value = true
+
+        viewModelScope.launch {
+            val orderService = OrderService.getInstance()
+
+            try {
+                val response = orderService.cancelOrder(
+                    orderId,
+                    CancelBody("canceled"),
+                    customerToken,
+                    Utils.contentType
+                )
+
+                if (response.isSuccessful) {
+                    refreshing.value = true
+                    showToast.value = true
+                    message.value = "Order Cancelled"
+                    //getOrder(orderId, customerToken)
+                } else {
+                    val error = response.errorBody()?.let {
+                        Gson().fromJson(it.string(), UpdateResponse::class.java)
+                    }
+                    refreshing.value = false
+                    showToast.value = true
+                    message.value = error?.message.toString()
+                }
+            } catch (e: Exception) {
+                message.value = e.message.toString()
+                showToast.value = true
+                refreshing.value = false
+            }
+        }
+    }
+
 
 }

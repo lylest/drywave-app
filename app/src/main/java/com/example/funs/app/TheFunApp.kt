@@ -23,9 +23,9 @@ import com.example.funs.screens.signup.SignupViewModel
 
 @Composable
 fun TheFunApp(appViewModel: AppViewModel = viewModel()) {
-    val userId by appViewModel.userId.observeAsState()
     val currentUserToken by appViewModel.currentUserToken.observeAsState()
 
+    println("current user token $currentUserToken")
     if (currentUserToken != null && currentUserToken != "not-found") {
         MainNav()
     } else if (currentUserToken == "not-found") {

@@ -45,10 +45,19 @@ data class Logo(
 
 data class Service(
     var _id: String,
-    var name: String
+    var name: String,
+    var code: String
 )
 
 data class OrderDetailsResponse (
     var message:String,
     var data: OrderDetails
+)
+
+data class  UpdateResponse (
+    var message: String
+)
+
+data class CancelBody (
+    var orderStatus: String
 )

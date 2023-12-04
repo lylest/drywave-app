@@ -20,6 +20,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.funs.screens.neworder.CircularIndicator
 import com.example.funs.screens.neworder.NewOrderViewModel
 import com.example.funs.screens.profile.ProfileViewModel
+import com.example.funs.screens.vieworder.OrderDetails
 
 
 @Composable
@@ -62,6 +63,48 @@ fun ButtonAdd(
             if (userId != null && currentUserToken != null) {
                 val tokenWithBearer = "Bearer $currentUserToken"
                 newOrderViewModel.saveOrder(tokenWithBearer, userId!!)
+            }
+        },
+        modifier = Modifier.fillMaxWidth().heightIn(50.dp),
+        shape = RoundedCornerShape(6.dp),
+        contentPadding = PaddingValues(),
+        enabled = !isEnabled
+    ) {
+
+        Box(
+            modifier = Modifier
+                .heightIn(50.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = label,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold
+            )
+            if(newOrderViewModel.isLoading.value) {
+                CircularIndicator()
+            }
+        }
+    }
+}
+
+@Composable
+fun ButtonSaveOrder(
+    order:OrderDetails,
+    orderId:String,
+    label: String,
+    isEnabled: Boolean,
+    profileViewModel: ProfileViewModel = viewModel(),
+    newOrderViewModel: NewOrderViewModel = viewModel()
+) {
+    val userId by profileViewModel.userId.observeAsState()
+    val currentUserToken by profileViewModel.currentUserToken.observeAsState()
+
+    Button(
+        onClick = {
+            if (userId != null && currentUserToken != null) {
+                val tokenWithBearer = "Bearer $currentUserToken"
+                newOrderViewModel.updateOrder(orderId,tokenWithBearer, userId!!, order)
             }
         },
         modifier = Modifier.fillMaxWidth().heightIn(50.dp),

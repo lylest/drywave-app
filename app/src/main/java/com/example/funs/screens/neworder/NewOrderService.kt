@@ -39,6 +39,15 @@ interface NewOrderService {
     ): Response<NewOrderResponse>
 
 
+    @POST("update/orders")
+    suspend fun updateOrder(
+        @Query("id") orderId: String?,
+        @Body order: Order,
+        @Header("Authorization") authToken: String?,
+        @Header("Content-Type") contentType: String = Utils.contentType
+    ): Response<NewOrderResponse>
+
+
     companion object {
         var getShopsRequest: NewOrderService? = null
 

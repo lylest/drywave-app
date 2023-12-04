@@ -7,6 +7,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.example.funs.screens.editorder.EditOrder
 import com.example.funs.screens.home.Home
 import com.example.funs.screens.neworder.NewOrder
 import com.example.funs.screens.notifications.Notifications
@@ -28,6 +29,17 @@ fun MainNavigation(navController: NavHostController) {
 
         composable(route = Screen.NewOrder.route) {
             NewOrder(navController = navController)
+        }
+
+        composable(route = Screen.EditOrder.route+ "/{orderId}",
+            arguments = listOf(
+                navArgument("orderId") {
+                    type = NavType.StringType
+                    defaultValue = "empty"
+                    nullable = true
+                }
+            )) { entry ->
+            EditOrder(orderId = entry.arguments?.getString("orderId"), navController = navController)
         }
 
         composable(
