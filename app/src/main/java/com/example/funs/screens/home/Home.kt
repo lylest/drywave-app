@@ -89,9 +89,6 @@ fun Home(
         }
     }
 
-    fun closeDialog() {
-        isVisible = false
-    }
 
     fun openDialog() {
         isVisible = true
@@ -149,7 +146,8 @@ fun Home(
 
                     Spacer(modifier = Modifier.heightIn(30.dp))
                     Row {
-                        SearchInput()
+                        SearchInput (navController)
+
                         Box(
                             contentAlignment = Alignment.Center,
                             modifier = Modifier
@@ -219,7 +217,13 @@ fun Home(
                 }
 
                 if (isVisible) {
-                    MinimalDialog { closeDialog() }
+                    MinimalDialog(onDismissRequest = { isVisible = false }, handleDateSelect = { datePickerState ->
+                        datePickerState.selectedDateMillis?.let {
+                            val tokenWithBearer = "Bearer $currentUserToken"
+                            homeViewModel.filterOrders(tokenWithBearer, userId!!, it)
+                            isVisible = false
+                        }
+                    })
                 }
 
             }
@@ -230,7 +234,9 @@ fun Home(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MinimalDialog(onDismissRequest: () -> Unit) {
+fun MinimalDialog(
+    onDismissRequest: () -> Unit,
+    handleDateSelect: (DatePickerState) -> Unit) {
     val datePickerState = rememberDatePickerState()
     val confirmEnabled = derivedStateOf<Boolean> { datePickerState.selectedDateMillis != null }
 
@@ -239,7 +245,7 @@ fun MinimalDialog(onDismissRequest: () -> Unit) {
         confirmButton = {
             TextButton(
                 onClick = {
-                    //"Selected date timestamp: ${datePickerState.selectedDateMillis}"
+                    handleDateSelect(datePickerState)
                 },
                 enabled = confirmEnabled.value
             ) {
@@ -256,8 +262,9 @@ fun MinimalDialog(onDismissRequest: () -> Unit) {
     ) {
         DatePicker(state = datePickerState)
     }
-
 }
+
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -303,7 +310,7 @@ fun OrderCard(
                     color = MaterialTheme.colorScheme.outline
                 )
 
-                Row{
+                Row {
                     OrderStatusTag(order.orderStatus)
                     Text(
                         text = NumberFormat.getNumberInstance(Locale.US).format(order.totalCost),
@@ -368,7 +375,11 @@ fun CircularProgress(
         modifier = Modifier.size(radius * 2f),
         contentAlignment = Alignment.Center
     ) {
-       if(imageUrl == "empty") {  ImageCard() } else { ShopLogo(imageUrl) }
+        if (imageUrl == "empty") {
+            ImageCard()
+        } else {
+            ShopLogo(imageUrl)
+        }
         Canvas(modifier = Modifier.size(radius * 2f).padding(24.dp)) {
             drawArc(
                 color = Color(android.graphics.Color.parseColor(colors[index])),

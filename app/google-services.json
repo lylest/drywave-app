@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "836420842955",
+    "project_id": "drywave-85615",
+    "storage_bucket": "drywave-85615.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:836420842955:android:a4c1e1b9a6ca37da7f724e",
+        "android_client_info": {
+          "package_name": "com.example.funs"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBXJjXePBlDmLeHk38iGiMiawEKMNE-Y5s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

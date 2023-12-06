@@ -32,6 +32,14 @@ interface HomeService  {
         @Header("Content-Type") contentType: String
     ): Response<CustomerOrderResponse>
 
+    @GET("read/orders")
+    suspend fun searchCustomerOrders(
+        @Query("searchCustomerOrder") customerId: String?,
+        @Query("keyword") keyword:String,
+        @Header("Authorization") authToken: String?,
+        @Header("Content-Type") contentType: String
+    ): Response<CustomerOrderResponse>
+
 
     companion object {
         var getSampleServiceRequest: HomeService? =  null

@@ -13,7 +13,6 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class HomeViewModel(application: Application): AndroidViewModel(application) {
-    private val dataStoreManager: DataStoreManager = DataStoreManager(application)
     var message= mutableStateOf("")
     var showToast = mutableStateOf(false)
     var sampleServices = MutableLiveData<MutableList<CleaningService>>()
@@ -70,7 +69,6 @@ class HomeViewModel(application: Application): AndroidViewModel(application) {
         return dateFormat.format(tomorrowDate)
     }
 
-
     fun formatDateString(inputDate: String): String {
         val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
         inputFormat.timeZone = TimeZone.getTimeZone("UTC")
@@ -119,6 +117,92 @@ class HomeViewModel(application: Application): AndroidViewModel(application) {
                 } else {
                     val error = response.errorBody()?.let {
                         Gson().fromJson(it.string(), SampleCleaningServiceResponse::class.java)
+                    }
+                }
+            } catch (e: Exception) {
+                message.value = e.message.toString()
+                showToast.value = true
+                refreshing.value = false
+            }
+        }
+    }
+
+    fun formatDateString(inputTimestamp: Long): String {
+        val date = Date(inputTimestamp)
+        val outputFormat = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
+        outputFormat.timeZone = TimeZone.getDefault()
+
+        return outputFormat.format(date)
+    }
+
+
+    fun filterOrders (customerToken: String, customerId: String, timeStamp: Long) {
+        val fromDate = formatDateString(timeStamp)
+        showToast.value = false
+        message.value = ""
+        refreshing.value = true
+
+        viewModelScope.launch {
+            val homeService = HomeService.getInstance()
+
+            try {
+                val response = homeService.getCustomerOrders(
+                    OrderFilters(
+                        fromDate = fromDate,
+                        toDate =  fromDate,
+                        orderStatus = "all",
+                        paymentStatus = "all"
+                    ),
+                    customerId,
+                    customerToken,
+                    Utils.contentType
+                )
+
+                if(response.isSuccessful) {
+                    response.body()?.data?.let {
+                        customerOrders.value = it
+                    }
+                    refreshing.value = false
+
+                } else {
+                    val error = response.errorBody()?.let {
+                        Gson().fromJson(it.string(), CustomerOrderResponse::class.java)
+                    }
+                }
+            } catch (e: Exception) {
+                message.value = e.message.toString()
+                showToast.value = true
+                refreshing.value = false
+            }
+        }
+    }
+
+
+    fun searchOrders ( customerToken: String, customerId: String,  keyword:String) {
+        showToast.value = false
+        message.value = ""
+        refreshing.value = true
+
+        viewModelScope.launch {
+            val homeService = HomeService.getInstance()
+
+            try {
+                val response = homeService.searchCustomerOrders(
+                    customerId,
+                    keyword,
+                    customerToken,
+                    Utils.contentType
+                )
+
+                if(response.isSuccessful) {
+                    response.body()?.data?.let {
+                        customerOrders.value = it
+                    }
+                    refreshing.value = false
+
+                } else {
+                    val error = response.errorBody()?.let {
+                        Gson().fromJson(it.string(), CustomerOrderResponse::class.java)
                     }
                 }
             } catch (e: Exception) {

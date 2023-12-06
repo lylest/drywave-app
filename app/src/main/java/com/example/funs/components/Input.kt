@@ -20,7 +20,12 @@ import androidx.compose.material3.SearchBar
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import com.example.funs.navigation.Screen
+import com.example.funs.screens.home.HomeViewModel
+import com.example.funs.screens.home.OrderItem
 import com.example.funs.screens.neworder.NewOrderViewModel
 import com.example.funs.screens.profile.ProfileViewModel
 
@@ -45,7 +50,6 @@ fun OutlinedInput(
         singleLine = true,
         label = { Text(label) },
         colors = TextFieldDefaults.outlinedTextFieldColors(
-            // textColor = MaterialTheme.colorScheme.onSurface,
             focusedBorderColor = MaterialTheme.colorScheme.primary,
             unfocusedBorderColor = MaterialTheme.colorScheme.outline,
             focusedLabelColor = MaterialTheme.colorScheme.primary,
@@ -72,7 +76,6 @@ fun OutlinedPasswordInput(
 ) {
 
     var password = remember { mutableStateOf("") }
-
     var passwordVisible = remember {
         mutableStateOf(false)
     }
@@ -114,18 +117,17 @@ fun OutlinedPasswordInput(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchInput() {
-    var text by remember { mutableStateOf("") } // Query for SearchBar
-    var active by remember { mutableStateOf(false) } // Active state for SearchBar
-    val items = remember {
-        mutableStateListOf(
-            "Alice",
-            "James",
-            "Cat",
-            "Sean"
-        )
-    }
-
+fun SearchInput(
+    navController: NavController,
+    profileViewModel: ProfileViewModel = viewModel(),
+    homeViewModel: HomeViewModel = viewModel()
+) {
+    var text by remember { mutableStateOf("") }
+    var active by remember { mutableStateOf(false) }
+    val userId by profileViewModel.userId.observeAsState()
+    val currentUserToken by profileViewModel.currentUserToken.observeAsState()
+    val tokenWithBearer = "Bearer $currentUserToken"
+    val items  by homeViewModel.customerOrders.observeAsState()
 
     Row(
         modifier = Modifier
@@ -138,6 +140,7 @@ fun SearchInput() {
             query = text,
             onQueryChange = {
                 text = it
+                homeViewModel.searchOrders(tokenWithBearer, userId!!, it)
             },
             onSearch = {
                 active = false
@@ -154,14 +157,11 @@ fun SearchInput() {
             },
             trailingIcon = {
                 if (active) {
-                    Icon(
-                        modifier = Modifier.clickable {
+                    Icon( modifier = Modifier.clickable {
                             if (!text.isEmpty()) {
-                                text = ""
-                                println("text is empty")
+                                active = false
                             } else {
                                 active = false
-                                println("text is not empty $text")
                             }
                         },
                         imageVector = Icons.Outlined.Close, contentDescription = "CloseIcon"
@@ -170,19 +170,23 @@ fun SearchInput() {
             },
             colors = SearchBarDefaults.colors(MaterialTheme.colorScheme.surface)
         ) {
-            items.forEach {
-                Row(modifier = Modifier.padding(all = 14.dp)) {
+            items?.forEach { order ->
+                Row(modifier = Modifier
+                    .padding(all = 14.dp)
+                    .clickable {  navController.navigate(Screen.ViewOrder.withArgs(order._id)) }
+                ) {
                     Icon(
                         modifier = Modifier.padding(end = 12.dp),
-                        imageVector = Icons.Outlined.History, contentDescription = null
+                        imageVector = Icons.Outlined.DryCleaning, contentDescription = null
                     )
-                    Text(text = it)
+                    Text(text = order.trackingId)
                 }
             }
         }
 
     }
 }
+
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -271,6 +275,7 @@ fun SearchItems(
 ) {
     var text by remember { mutableStateOf("") } // Query for SearchBar
     var active by remember { mutableStateOf(false) } // Active state for SearchBar
+
     val userId by profileViewModel.userId.observeAsState()
     val currentUserToken by profileViewModel.currentUserToken.observeAsState()
     val itemsList by newOrderViewModel.itemsList.observeAsState()

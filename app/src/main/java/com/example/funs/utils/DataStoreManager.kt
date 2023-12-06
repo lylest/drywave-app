@@ -2,10 +2,7 @@ package com.example.funs.utils
 
 import android.content.Context
 import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.emptyPreferences
-import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -21,6 +18,8 @@ class DataStoreManager(context: Context) {
     companion object {
         val userTokenKey = stringPreferencesKey("user-token-key")
         val userIdkey = stringPreferencesKey("user-id-key")
+        val gsmTokenKey = stringPreferencesKey("gsm_token_key")
+        val notificationCountKey = intPreferencesKey("notification_count_key")
     }
 
     suspend fun setUserToken(newToken: String) {
@@ -33,6 +32,20 @@ class DataStoreManager(context: Context) {
     suspend fun setUserId(newId: String) {
         dataStore.edit { pref ->
             pref[userIdkey] = newId
+        }
+    }
+
+    suspend fun setGSMToken(newToken: String) {
+        dataStore.edit { pref ->
+            pref[gsmTokenKey] = newToken
+
+        }
+    }
+
+    suspend fun setNotificationCount(newToken: Int) {
+        dataStore.edit { pref ->
+            pref[notificationCountKey] = newToken
+
         }
     }
 
@@ -61,6 +74,34 @@ class DataStoreManager(context: Context) {
             }
             .map { pref ->
                 pref[userTokenKey] ?: "not-found"
+            }
+    }
+
+    fun getGSMToken(): Flow<String> {
+        return dataStore.data
+            .catch { exception ->
+                if (exception is IOException) {
+                    emit(emptyPreferences())
+                } else {
+                    throw exception
+                }
+            }
+            .map { pref ->
+                pref[gsmTokenKey] ?: "not-found"
+            }
+    }
+
+    fun totalNotificationCount(): Flow<Int> {
+        return dataStore.data
+            .catch { exception ->
+                if (exception is IOException) {
+                    emit(emptyPreferences())
+                } else {
+                    throw exception
+                }
+            }
+            .map { pref ->
+                pref[notificationCountKey] ?: 0
             }
     }
 }
